@@ -46,3 +46,6 @@ This function computes the likelihood the data x was generated
   where m is the number of quadrature points, ie that the quadpts are
   pre-computed based on the Uniform(0,1) distribution.
 }
+\seealso{
+rlomax
+}

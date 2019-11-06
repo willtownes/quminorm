@@ -41,6 +41,8 @@
 #'
 #' @return a vector of (log) probabilities
 #'
+#' @seealso rlomax
+#'
 #' @importFrom statmod gauss.quad.prob
 #' @importFrom matrixStats logSumExp
 #' @importFrom stats dpois
@@ -354,19 +356,34 @@ rburr<-function(n,lambda,k=1.01,shape=1,is_median=TRUE,logscale=FALSE){
   return(exp(lx))
 }
 
-rlomax<-function(n,tail=1.01,scale=1,logscale=FALSE,cut=Inf){
-  x<-rburr(n,scale,k=tail,shape=1,is_median=FALSE,logscale=logscale)
+#' @title Lomax random number generation
+#' @description Draw random samples from the Lomax distribution
+#' @name rlomax
+#'
+#' @param n a positive scalar indicating the number of random variables to draw.
+#' @param tail a positive scalar controlling the heaviness of the Lomax tail.
+#' @param scale a positive scalar.
+#' @param logscale logical; if TRUE, the natural log of the random variables is
+#'   returned instead of the variables themselves.
+#'
+#' @details  The density function of the Lomax distribution is given by
+#'   \eqn{f(x)=\frac{\alpha}{\lambda}\left(1+\frac{x}{\lambda}\right)^{-(\alpha+1)}}
+#'   where \eqn{\alpha,\lambda} are the tail and scale parameters, respectively.
+#'   Lomax has a heavy power-law tail with exponent (1+tail). The smaller the
+#'   tail parameter, the heavier the tail of the distribution. If tail<=1 there
+#'   is no mean, if tail<2 there is no variance. A larger scale parameter means
+#'   fewer zeros and more large values. The scale parameter has no effect on the
+#'   power-law tail.
+#'
+#' @return a vector of (possibly log-transformed) Lomax distributed random
+#'   variates.
+#'
+#' @seealso dnblomax
+#'
+#' @export
+rlomax<-function(n,tail=1.01,scale=1,logscale=FALSE){
   #x<-VGAM::rlomax(n,scale=scale,shape3.q=tail)
-  #if(logscale){ x<-log(x) }
-  if(is.infinite(cut)){
-    return(x)
-  } else {
-    #exponential cutoff via competing risks
-    #set intersection of survival curves to "cut" value, eg 10^6
-    y<-stats::rexp(n,rate=tail*log1p(cut/scale)/cut)
-    if(logscale) y<-log(y)
-    return(pmin(x,y))
-  }
+  rburr(n,scale,k=tail,shape=1,is_median=FALSE,logscale=logscale)
 }
 
 rplomax<-function(n,tail=1.01,scale=1,cut=Inf){
