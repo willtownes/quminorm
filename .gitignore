@@ -1,3 +1,6 @@
+# File extensions added by Will Townes
+.DS_Store
+
 # History files
 .Rhistory
 .Rapp.history
