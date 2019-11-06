@@ -13,8 +13,22 @@ Authors@R: c(person("F. William", "Townes", email = "will.townes@gmail.com",
 License: LGPL (>= 3) | file LICENSE
 Depends:
     R (>= 3.5)
+Imports:
+    fitdistrplus,
+    graphics,
+    matrixStats,
+    methods,
+    plotrix,
+    sads,
+    slam,
+    statmod,
+    stats,
+    utils
+Suggests:
+    knitr
 URL: https://github.com/willtownes/quminorm
 BugReports: https://github.com/willtownes/quminorm/issues
 VignetteBuilder: knitr
 LazyData: false
 Encoding: UTF-8
+RoxygenNote: 6.1.1

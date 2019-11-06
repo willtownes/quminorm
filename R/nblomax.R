@@ -41,13 +41,17 @@
 #'
 #' @return a vector of (log) probabilities
 #'
+#' @importFrom statmod gauss.quad.prob
+#' @importFrom matrixStats logSumExp
+#' @importFrom stats dpois
+#' @importFrom stats dnbinom
 #' @export
 dnblomax<-function(x, tail=1, scale=1, shape=1, log=FALSE, quadpts=1000){
   if(is.list(quadpts)){
     q<-quadpts
     mu<-scale*((1-q$nodes)^(-1/tail)-1) #inverse CDF of Lomax
   } else {
-    q<-statmod::gauss.quad.prob(quadpts,dist="beta",alpha=1,beta=tail)
+    q<-gauss.quad.prob(quadpts,dist="beta",alpha=1,beta=tail)
     mu<-scale*q$nodes/(1-q$nodes)
   }
   w<-log(q$weights)
@@ -57,7 +61,7 @@ dnblomax<-function(x, tail=1, scale=1, shape=1, log=FALSE, quadpts=1000){
     f<-function(xi){dnbinom(xi,size=shape,mu=mu,log=TRUE)}
   }
   #approximate the log of the integral
-  g<-function(xi){matrixStats::logSumExp(w+f(xi))}
+  g<-function(xi){logSumExp(w+f(xi))}
   #log PMF for all data points x and all quadrature points t
   #matrix with nrow=quadpts, ncol=length(x)
   lpmf<-vapply(x,g,FUN.VALUE=0.0)
@@ -75,12 +79,12 @@ dplomax<-function(x,...){ dnblomax(x,shape=Inf,...) }
 #'
 #' @param xmax the maximum quantile at which to evaluate the PMF.
 #' @param lpar numeric vector containing the tail, scale, and shape parameters
-#'   see \link{dnblomax} for details.
+#'   see \code{\link{dnblomax}} for details.
 #' @param lik choice of negative binomial, geometric, or Poisson likelihood
 #' @param q positive integer number of quadrature points, increase for better
 #'   accuracy
 #' @param add logical, should the curve be added to the existing plot window?
-#' @param ... additional arguments passed to \link[graphics]{curve}
+#' @param ... additional arguments passed to \code{\link[graphics]{curve}}
 #'
 #' @return a list with components x and y of the points that were drawn is
 #'   returned invisibly.
@@ -98,9 +102,11 @@ llcurve_lomax<-function(xmax, lpar=c(1,1,1), lik=c("nb","geom","poi"), q=1000,
   f<-function(t){
     dnblomax(floor(expm1(t)),tail=lpar[1],scale=lpar[2],shape=lpar[3],quadpts=q,log=TRUE)
   }
-  curve(f,from=0,to=log1p(xmax),add=add,...)
+  graphics::curve(f,from=0,to=log1p(xmax),add=add,...)
 }
 
+#' @importFrom stats dpois
+#' @importFrom stats dnbinom
 nblomax_score<-function(x,tail=1,scale=1,shape=1,quadpts=1000,fix_shape=FALSE){
   #the gradient of the log likelihood (data=x) at each data point
   #returns matrix with length(x) rows and num_params cols
@@ -155,7 +161,7 @@ nblomax_score<-function(x,tail=1,scale=1,shape=1,quadpts=1000,fix_shape=FALSE){
 #' @param x vector of non-negative integers (the data).
 #' @param quadpts positive integer, number of quadrature points.
 #' @param m numeric vector of length three. The prior means for the log of the
-#'   tail, scale, and shape parameters. See \link{dnblomax} for details.
+#'   tail, scale, and shape parameters. See \code{\link{dnblomax}} for details.
 #' @param s numeric vector of length three. The prior standard deviations for
 #'   the log of the tail, scale, and shape parameters. If s is finite, an L2
 #'   (ridge) penalty shrinks the MLEs toward m. If s is Inf, the unpenalized MLE
@@ -164,8 +170,8 @@ nblomax_score<-function(x,tail=1,scale=1,shape=1,quadpts=1000,fix_shape=FALSE){
 #'   data. If not NULL, the shape parameter is fixed at the specified value
 #'   and only tail and scale are estimated. Shape=Inf corresponds to
 #'   Poisson-Lomax.
-#' @param om optimization method to be used by \link[stats]{optim}.
-#' @param ... additional arguments passed to \link[stats]{optim}
+#' @param om optimization method to be used by \code{\link[stats]{optim}}.
+#' @param ... additional arguments passed to \code{\link[stats]{optim}}
 #'
 #' @return a named numeric vector containing the MLEs of tail, scale, and shape
 #'   the maximized value of the log-likelihood is attached as an attribute.
@@ -190,7 +196,7 @@ nblomax_mle<-function(x, quadpts=1000, m=rep(0,3), s=rep(Inf,3), shape=NULL,
     getshape<-function(ez){ez[3]}
   }
   #z = log of tail,scale,shape (initialize with all pars = 1)
-  z<-rnorm(k,0,.5)
+  z<-stats::rnorm(k,0,.5)
   names(z)<-znames #<-names(m)<-names(s)
   penalty<-1/(length(x)*s^2)
   f<-function(z){
@@ -207,7 +213,7 @@ nblomax_mle<-function(x, quadpts=1000, m=rep(0,3), s=rep(Inf,3), shape=NULL,
     #score is a k-vector
     score - sum(penalty*(z-m))
   }
-  res<-optim(z,f,g,control=list(fnscale=-1),method=om,...) #fnscale makes it maximize
+  res<-stats::optim(z,f,g,control=list(fnscale=-1),method=om,...) #fnscale makes it maximize
   mle<-rep(NA,k)
   names(mle)<-znames
   if(res$convergence==0){
@@ -232,11 +238,11 @@ glomax_mle<-function(x,...){ nblomax_mle(x,shape=1,...) }
 #' @param maxtry positive integer, number of times to retry fitting if initial
 #'   fit fails due to numerical problems. Each retry increases quadpts by 500.
 #' @param verbose logical, should progress messages be printed?
-#' @param ... additional arguments passed to \link{nblomax_mle}
+#' @param ... additional arguments passed to \code{\link{nblomax_mle}}
 #'
 #' @return a data frame whose rows correspond to the columns of m.
 #'   The columns contain the MLEs for the parameters, the log-likelihood, and
-#'   the \link[stats]{BIC} values.
+#'   the \code{\link[stats]{BIC}} values.
 #'
 #' @export
 nblomax_mle_matrix<-function(m,quadpts=1000,maxtry=10,verbose=FALSE,...){
@@ -249,7 +255,7 @@ nblomax_mle_matrix<-function(m,quadpts=1000,maxtry=10,verbose=FALSE,...){
     mle<-nblomax_mle(x,quadpts=quadpts,...)
     c(mle,loglik=attr(mle,"loglik"))
   }
-  if(is(m,"sparseMatrix")){
+  if(methods::is(m,"sparseMatrix")){
     apply_func<-function(m){
       m<-slam::as.simple_triplet_matrix(m)
       res<-slam::colapply_simple_triplet_matrix(m,mle_func)
@@ -297,12 +303,11 @@ glomax_mle_matrix<-function(m,...){ nblomax_mle_matrix(m,shape=1,...) }
 #'   specifying the fixed tail parameter(s).
 #' @param quadpts positive integer, number of quadrature points.
 #' @param lims interval of possible values for the scale
-#'   parameter, passed to \link[stats]{uniroot}.
+#'   parameter, passed to \code{\link[stats]{uniroot}}.
 #'
 #' @return a numeric vector of estimated scale parameters for each element of
 #'   lpz.
 #'
-#' @export
 pglomax_pzero2scale<-function(lpz, lik=c("poisson","geometric"), tail=0.8,
                               quadpts=1000, lims=c(1e-6,100)){
   #Assuming the data follows a Poisson-Lomax
@@ -320,7 +325,7 @@ pglomax_pzero2scale<-function(lpz, lik=c("poisson","geometric"), tail=0.8,
       #s is the estimated scale parameter
       x-dfunc(0,tail=t,scale=s,log=TRUE,quadpts=quadpts)
     }
-    uniroot(f,lims)$root
+    stats::uniroot(f,lims)$root
   }
   if(length(tail)==1){ #single tail parameter for all cells
     return(vapply(lpz,inner,FUN.VALUE=1.0,t=tail))
@@ -341,13 +346,14 @@ rburr<-function(n,lambda,k=1.01,shape=1,is_median=TRUE,logscale=FALSE){
   #shape=concentration parameter. Larger values= peakier distribution
   #for c<=1 the mode is zero. Otherwise mode is nonzero
   #the mean only exists if k>1, variance only exists if k>2
-  log_pareto<-log(expm1(rexp(n,k)))
+  log_pareto<-log(expm1(stats::rexp(n,k)))
   log_lambda<-log(lambda)
   if(is_median) log_lambda<-log_lambda-log(expm1(log(2)/k))/shape
   lx<-log_lambda+log_pareto/shape
   if(logscale) return(lx)
   return(exp(lx))
 }
+
 rlomax<-function(n,tail=1.01,scale=1,logscale=FALSE,cut=Inf){
   x<-rburr(n,scale,k=tail,shape=1,is_median=FALSE,logscale=logscale)
   #x<-VGAM::rlomax(n,scale=scale,shape3.q=tail)
@@ -357,21 +363,24 @@ rlomax<-function(n,tail=1.01,scale=1,logscale=FALSE,cut=Inf){
   } else {
     #exponential cutoff via competing risks
     #set intersection of survival curves to "cut" value, eg 10^6
-    y<-rexp(n,rate=tail*log1p(cut/scale)/cut)
+    y<-stats::rexp(n,rate=tail*log1p(cut/scale)/cut)
     if(logscale) y<-log(y)
     return(pmin(x,y))
   }
 }
+
 rplomax<-function(n,tail=1.01,scale=1,cut=Inf){
   #poisson with lomax prior
   mu<-rlomax(n,tail=tail,scale=scale,logscale=FALSE,cut=cut)
-  rpois(n,mu)
+  stats::rpois(n,mu)
 }
+
 rglomax<-function(n,tail=1.01,scale=1,cut=Inf){
   lmu<-rlomax(n,tail=tail,scale=scale,logscale=TRUE,cut=cut)
-  rgeom(n,plogis(lmu,lower.tail=FALSE))
+  stats::rgeom(n,stats::plogis(lmu,lower.tail=FALSE))
 }
+
 rnblomax<-function(n,tail=1.01,scale=1,shape=1,cut=Inf){
   mu<-rlomax(n,tail=tail,scale=scale,logscale=FALSE,cut=cut)
-  rnbinom(n,size=shape,mu=mu)
+  stats::rnbinom(n,size=shape,mu=mu)
 }

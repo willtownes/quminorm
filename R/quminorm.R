@@ -5,7 +5,8 @@
 #source("./algs/poilog.R")
 
 #x,y must be scalars!
-logspace_add<-function(x,y){ matrixStats::logSumExp(c(x,y)) }
+#' @importFrom matrixStats logSumExp
+logspace_add<-function(x,y){ logSumExp(c(x,y)) }
 
 log_cumsum_exp<-function(lp){
   #lp a vector of log probabilities
@@ -34,7 +35,7 @@ make_cdf_nz<-function(thresh,dfunc,maxval=1e6){
     #update the first pmf value by adding the max cdf to it
     lpmf[1]<-logspace_add(lpmf[1],lcdf_max)
     lcdf<-c(lcdf,log_cumsum_exp(lpmf))
-    lcdf_max<-tail(lcdf,1)
+    lcdf_max<-utils::tail(lcdf,1)
     lo<-hi #100
     hi<-2*hi #200
   }
@@ -109,6 +110,9 @@ quminorm_plomax<-function(x,shape,sc=NULL,quadpts=1000){
   x #quantile normalized version of x
 }
 
+#' @importFrom stats dnbinom
+#' @importFrom stats qnbinom
+#' @importFrom stats pnbinom
 quminorm_nb<-function(x,shape,sc=NULL,quadpts=NULL){
   #shape=size, sc=mu
   #size,mu are params of negative binomial as in dnbinom
@@ -148,8 +152,8 @@ quminorm_nb<-function(x,shape,sc=NULL,quadpts=NULL){
 #' @param shape positive scalar, a fixed shape parameter for the target
 #'   distribution. The shape parameter represents sigma, tail, and size for the
 #'   Poisson-lognormal, Poisson-Lomax, and negative binomial target
-#'   distributions, respectively. See \link[sads]{dpoilog}, \link{dnblomax}, or
-#'   \link[stats]{dnbinom}.
+#'   distributions, respectively. See \code{\link[sads]{dpoilog}}, \code{\link{dnblomax}}, or
+#'   \code{\link[stats]{dnbinom}}.
 #' @param lik likelihood of target distribution, either Poisson-lognormal,
 #'   Poisson-Lomax, or negative binomial.
 #' @param quadpts positive integer, number of quadrature points. Increase for
@@ -216,7 +220,7 @@ lpmf<-function(x,bw=.25,logbase=NULL,discrete=TRUE,midpt=FALSE,bin_thresh=10,add
   } else {
     breaks<-c(u[-length(u)],exp(log1p(max(u))))
   }
-  h<-hist(x,breaks=breaks,right=FALSE,plot=FALSE)
+  h<-graphics::hist(x,breaks=breaks,right=FALSE,plot=FALSE)
   if(midpt){
     #use geometric mean to get midpoints
     gmean<-function(t){floor(sqrt(breaks[t]*breaks[t+1]))}
@@ -229,9 +233,9 @@ lpmf<-function(x,bw=.25,logbase=NULL,discrete=TRUE,midpt=FALSE,bin_thresh=10,add
   yvals<-log(h$density[good])
   if(doplot){
     if(add){
-      lines(xvals,yvals,...)
+      graphics::lines(xvals,yvals,...)
     } else {
-      plot(xvals,yvals,xlab=xlab,ylab="log(density)",...)
+      graphics::plot(xvals,yvals,xlab=xlab,ylab="log(density)",...)
     }
   } else {
     return(data.frame(x=xvals,y=yvals))
@@ -250,11 +254,11 @@ lpmf_xtra<-function(lpmf_obj,connect=TRUE,logbase=NULL,...){
   }
   res$lx<-log(res$x)
   res$lx[1]<- -log(2)
-  plot(res$lx,res$y,xaxt="n",...)
+  graphics::plot(res$lx,res$y,xaxt="n",...)
   if(connect){
-    lines(res$lx[-1],res$y[-1])
+    graphics::lines(res$lx[-1],res$y[-1])
   }
-  axis(1, at=res$lx, labels=round(res$x,1))
+  graphics::axis(1, at=res$lx, labels=round(res$x,1))
   plotrix::axis.break(1,-log(2)/2)
   plotrix::axis.break(3,-log(2)/2)
 }
@@ -267,5 +271,5 @@ lsurv<-function(x,...){
   ly<-log(G-cumsum(xt))-log(G)
   ylab<-"log(1-CDF)"
   lx<-log1p(as.integer(names(ly)))
-  plot(lx,ly,xlab="log(1+x)",ylab=ylab,...)
+  graphics::plot(lx,ly,xlab="log(1+x)",ylab=ylab,...)
 }

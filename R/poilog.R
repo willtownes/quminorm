@@ -1,5 +1,6 @@
 # functions for fitting and quantile normalizing to poisson-lognormal
 
+#' @importFrom stats dpois
 dpoilog<-function(x,mu,sig,log=FALSE,quadpts=1000){
   #Compute PMF of Poisson-lognormal
   #same functionality as poilog::dpoilog
@@ -36,14 +37,14 @@ dpoilog<-function(x,mu,sig,log=FALSE,quadpts=1000){
 #'
 #' @param xmax the maximum quantile at which to evaluate the PMF.
 #' @param lpar numeric vector containing the parameters mu,sig
-#'   see \link[sads]{dpoilog} for details.
+#'   see \code{\link[sads]{dpoilog}} for details.
 #' @param add logical, should the curve be added to the existing plot window?
 #' @param use_sads logical, should the sads package be used to compute
-#'   \link[sads]{dpoilog}? If not, an internal custom implementation is used.
+#'   \code{\link[sads]{dpoilog}}? If not, an internal custom implementation is used.
 #'   The custom implementation is less numerically stable than sads.
 #' @param quadpts positive integer number of quadrature points, increase for
 #'   better accuracy
-#' @param ... additional arguments passed to \link[graphics]{curve}
+#' @param ... additional arguments passed to \code{\link[graphics]{curve}}
 #'
 #' @return a list with components x and y of the points that were drawn is
 #'   returned invisibly.
@@ -62,7 +63,7 @@ llcurve_poilog<-function(xmax,lpar,add=TRUE,use_sads=TRUE,quadpts=1000,...){
       dpoilog(floor(expm1(t)),mu=lpar[1],sig=lpar[2],log=TRUE,quadpts=quadpts)
     }
   }
-  curve(f,from=0,to=log1p(xmax),add=add,...)
+  graphics::curve(f,from=0,to=log1p(xmax),add=add,...)
 }
 
 #' @title Log-log curve for negative binomial PMF
@@ -72,9 +73,9 @@ llcurve_poilog<-function(xmax,lpar,add=TRUE,use_sads=TRUE,quadpts=1000,...){
 #'
 #' @param xmax the maximum quantile at which to evaluate the PMF.
 #' @param lpar numeric vector containing the parameters size,mu
-#'   see \link[stats]{dnbinom} for details.
+#'   see \code{\link[stats]{dnbinom}} for details.
 #' @param add logical, should the curve be added to the existing plot window?
-#' @param ... additional arguments passed to \link[graphics]{curve}
+#' @param ... additional arguments passed to \code{\link[graphics]{curve}}
 #'
 #' @return a list with components x and y of the points that were drawn is
 #'   returned invisibly.
@@ -85,9 +86,9 @@ llcurve_nb<-function(xmax,lpar,add=TRUE,...){
   #Curve goes from zero to xmax
   #lpar are the size and mu parameters
   f<-function(t){
-    dnbinom(floor(expm1(t)),size=lpar[1],mu=lpar[2],log=TRUE)
+    stats::dnbinom(floor(expm1(t)),size=lpar[1],mu=lpar[2],log=TRUE)
   }
-  curve(f,from=0,to=log1p(xmax),add=add,...)
+  graphics::curve(f,from=0,to=log1p(xmax),add=add,...)
 }
 
 #' @title Poisson-lognormal MLEs
@@ -96,11 +97,11 @@ llcurve_nb<-function(xmax,lpar,add=TRUE,...){
 #' @name poilog_mle
 #'
 #' @param x vector of non-negative integers (the data).
-#' @param om optimization method to be used by \link[sads]{fitpoilog}.
-#' @param ... additional arguments passed to \link[sads]{fitpoilog}.
+#' @param om optimization method to be used by \code{\link[sads]{fitpoilog}}.
+#' @param ... additional arguments passed to \code{\link[sads]{fitpoilog}}.
 #'
 #' @return a named numeric vector containing the MLEs of mu,sigma (see
-#'   \link[sads]{dpoilog} for details).
+#'   \code{\link[sads]{dpoilog}} for details).
 #'   The maximized value of the log-likelihood is attached as an attribute.
 #'
 #' @export
@@ -109,8 +110,8 @@ poilog_mle<-function(x,om="BFGS",...){
   #mle<-fit$par
   #sads more stable than poilog
   fit<-sads::fitpoilog(x,trunc=NULL,method=om,skip.hessian=TRUE,...)
-  mle<-coef(fit) #fit$par
-  attr(mle,"loglik")<-as.numeric(logLik(fit)) #fit$logLval
+  mle<-stats::coef(fit) #fit$par
+  attr(mle,"loglik")<-as.numeric(stats::logLik(fit)) #fit$logLval
   mle
 }
 
@@ -120,17 +121,17 @@ poilog_mle<-function(x,om="BFGS",...){
 #' @name nb_mle
 #'
 #' @param x vector of non-negative integers (the data).
-#' @param ... additional arguments passed to \link[fitdistrplus]{fitdist}.
+#' @param ... additional arguments passed to \code{\link[fitdistrplus]{fitdist}}.
 #'
 #' @return a named numeric vector containing the MLEs of size,mu (see
-#'   \link[stats]{dnbinom} for details).
+#'   \code{\link[stats]{dnbinom}} for details).
 #'   The maximized value of the log-likelihood is attached as an attribute.
 #'
 #' @export
 nb_mle<-function(x,...){
   fit<-fitdistrplus::fitdist(x,"nbinom",keepdata=FALSE,...)
-  mle<-coef(fit)
-  attr(mle,"loglik")<-logLik(fit)
+  mle<-stats::coef(fit)
+  attr(mle,"loglik")<-stats::logLik(fit)
   mle
 }
 
@@ -150,7 +151,7 @@ mle_matrix<-function(m,lik=c("poilog","nb"),...){
       rep(NA,3)
     })
   }
-  if(is(m,"sparseMatrix")){
+  if(methods::is(m,"sparseMatrix")){
     apply_func<-function(m){
       m<-slam::as.simple_triplet_matrix(m)
       res<-slam::colapply_simple_triplet_matrix(m,mle_func)
@@ -170,11 +171,11 @@ mle_matrix<-function(m,lik=c("poilog","nb"),...){
 #' @name poilog_mle_matrix
 #'
 #' @param m a matrix or sparse Matrix of non-negative integers (the data).
-#' @param ... additional arguments passed to \link{poilog_mle}.
+#' @param ... additional arguments passed to \code{\link{poilog_mle}}.
 #'
 #' @return a data frame whose rows correspond to the columns of m.
 #'   The columns contain the MLEs for the parameters, the log-likelihood, and
-#'   the \link[stats]{BIC} values.
+#'   the \code{\link[stats]{BIC}} values.
 #'
 #' @export
 poilog_mle_matrix<-function(m,...){
@@ -189,11 +190,11 @@ poilog_mle_matrix<-function(m,...){
 #' @name nb_mle_matrix
 #'
 #' @param m a matrix or sparse Matrix of non-negative integers (the data).
-#' @param ... additional arguments passed to \link{nb_mle}.
+#' @param ... additional arguments passed to \code{\link{nb_mle}}.
 #'
 #' @return a data frame whose rows correspond to the columns of m.
 #'   The columns contain the MLEs for the parameters, the log-likelihood, and
-#'   the \link[stats]{BIC} values.
+#'   the \code{\link[stats]{BIC}} values.
 #'
 #' @export
 nb_mle_matrix<-function(m,...){
@@ -209,12 +210,11 @@ nb_mle_matrix<-function(m,...){
 #' @param lpz a numeric vector representing the natural log of the empirical
 #'   fraction of zeros from count data.
 #' @param size either a positive scalar or a vector of same length as lpz
-#'   specifying the fixed size parameter (see \link[stats]{dnbinom}).
+#'   specifying the fixed size parameter (see \code{\link[stats]{dnbinom}}).
 #'
 #' @return a numeric vector of estimated scale parameters for each element of
 #'   lpz.
 #'
-#' @export
 nb_pzero2mu<-function(lpz,size){
   #Assuming the data follows a negative binomial distribution
   #if we fix the size parameter to a specified value
@@ -233,14 +233,13 @@ nb_pzero2mu<-function(lpz,size){
 #' @param lpz a numeric vector representing the natural log of the empirical
 #'   fraction of zeros from count data.
 #' @param sig either a positive scalar or a vector of same length as lpz
-#'   specifying the fixed sigma parameter (see \link[sads]{dpoilog}).
+#'   specifying the fixed sigma parameter (see \code{\link[sads]{dpoilog}}).
 #' @param lims interval of possible values for the scale
-#'   parameter (mu), passed to \link[stats]{uniroot}.
+#'   parameter (mu), passed to \code{\link[stats]{uniroot}}.
 #'
 #' @return a numeric vector of estimated scale parameters (mu) for each element
 #' of lpz.
 #'
-#' @export
 poilog_pzero2mu<-function(lpz,sig=2.5,lims=c(-100,100)){
   #Assuming the data follows a Poisson-lognormal
   #if we fix the 'sig' parameter to a specified value
@@ -255,7 +254,7 @@ poilog_pzero2mu<-function(lpz,sig=2.5,lims=c(-100,100)){
     f<-function(mu){
       x-sads::dpoilog(0,mu,sig=s,log=TRUE)
     }
-    uniroot(f,lims)$root
+    stats::uniroot(f,lims)$root
   }
   if(length(sig)==1){ #single sig parameter for all cells
     return(vapply(lpz,inner,FUN.VALUE=1.0,s=sig))
