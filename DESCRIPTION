@@ -4,8 +4,8 @@ Title: Quantile Normalization of Single-cell RNA-seq Read Counts Without UMIs
 Version: 0.1.0
 Description: Converts single-cell RNA-seq read counts lacking unique molecular 
     identifiers (UMIs) into "quasi-UMIs" which can be analyzed as if they were
-    real UMI counts. This normalization attempts to remove distortions due to
-    PCR amplification.
+    real UMI counts. The goal of this normalization is to remove distortions 
+    due to PCR amplification.
 Authors@R: c(person("F. William", "Townes", email = "will.townes@gmail.com",
             role = c("aut", "cre", "cph")),
             person("Kelly", "Street", email = "street.kelly@gmail.com", 
