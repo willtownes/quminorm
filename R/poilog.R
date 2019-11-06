@@ -1,12 +1,9 @@
 # functions for fitting and quantile normalizing to poisson-lognormal
-#library(slam)
-#library(Matrix)
-#library(sads)
 
 dpoilog<-function(x,mu,sig,log=FALSE,quadpts=1000){
   #Compute PMF of Poisson-lognormal
   #same functionality as poilog::dpoilog
-  #poilog::dpoilog is faster, but this func should work better for 
+  #poilog::dpoilog is faster, but this func should work better for
   #tiny probabilities (better numerical stability)
   #mu,sig are same as in poilog::dpoilog
   #if quadpts is a number, the quadrature points are recomputed based on
@@ -25,15 +22,35 @@ dpoilog<-function(x,mu,sig,log=FALSE,quadpts=1000){
   w<-log(q$weights)
   f<-function(xi){dpois(xi,lam,log=TRUE)}
   #approximate the log of the integral
-  g<-function(xi){matrixStats::logSumExp(w+f(xi))} 
+  g<-function(xi){matrixStats::logSumExp(w+f(xi))}
   #log PMF for all data points x and all quadrature points t
   #matrix with nrow=quadpts, ncol=length(x)
   lpmf<-vapply(x,g,FUN.VALUE=0.0)
   if(log==TRUE){ return(lpmf) } else { return(exp(lpmf)) }
 }
 
+#' @title Log-log curve for Poisson-lognormal PMF
+#' @description Draw the probability mass function of a Poisson-lognormal
+#'   distribution with both horizontal and vertical axes log transformed.
+#' @name llcurve_poilog
+#'
+#' @param xmax the maximum quantile at which to evaluate the PMF.
+#' @param lpar numeric vector containing the parameters mu,sig
+#'   see \link[sads]{dpoilog} for details.
+#' @param add logical, should the curve be added to the existing plot window?
+#' @param use_sads logical, should the sads package be used to compute
+#'   \link[sads]{dpoilog}? If not, an internal custom implementation is used.
+#'   The custom implementation is less numerically stable than sads.
+#' @param quadpts positive integer number of quadrature points, increase for
+#'   better accuracy
+#' @param ... additional arguments passed to \link[graphics]{curve}
+#'
+#' @return a list with components x and y of the points that were drawn is
+#'   returned invisibly.
+#'
+#' @export
 llcurve_poilog<-function(xmax,lpar,add=TRUE,use_sads=TRUE,quadpts=1000,...){
-  #Draw the PMF curve on log-log axes for a Poisson-lognormal distribution 
+  #Draw the PMF curve on log-log axes for a Poisson-lognormal distribution
   #Curve goes from zero to xmax
   #lpar are the mu,sigma parameters (log scale, default for sads and poilog packages)
   if(use_sads){
@@ -48,6 +65,21 @@ llcurve_poilog<-function(xmax,lpar,add=TRUE,use_sads=TRUE,quadpts=1000,...){
   curve(f,from=0,to=log1p(xmax),add=add,...)
 }
 
+#' @title Log-log curve for negative binomial PMF
+#' @description Draw the probability mass function of a negative binomial
+#'   distribution with both horizontal and vertical axes log transformed.
+#' @name llcurve_nb
+#'
+#' @param xmax the maximum quantile at which to evaluate the PMF.
+#' @param lpar numeric vector containing the parameters size,mu
+#'   see \link[stats]{dnbinom} for details.
+#' @param add logical, should the curve be added to the existing plot window?
+#' @param ... additional arguments passed to \link[graphics]{curve}
+#'
+#' @return a list with components x and y of the points that were drawn is
+#'   returned invisibly.
+#'
+#' @export
 llcurve_nb<-function(xmax,lpar,add=TRUE,...){
   #Draw the PMF curve on log-log axes for a negative binomial distribution
   #Curve goes from zero to xmax
@@ -58,6 +90,20 @@ llcurve_nb<-function(xmax,lpar,add=TRUE,...){
   curve(f,from=0,to=log1p(xmax),add=add,...)
 }
 
+#' @title Poisson-lognormal MLEs
+#' @description Compute the maximum likelihood estimates for parameters of the
+#'   Poisson-lognormal distribution.
+#' @name poilog_mle
+#'
+#' @param x vector of non-negative integers (the data).
+#' @param om optimization method to be used by \link[sads]{fitpoilog}.
+#' @param ... additional arguments passed to \link[sads]{fitpoilog}.
+#'
+#' @return a named numeric vector containing the MLEs of mu,sigma (see
+#'   \link[sads]{dpoilog} for details).
+#'   The maximized value of the log-likelihood is attached as an attribute.
+#'
+#' @export
 poilog_mle<-function(x,om="BFGS",...){
   #fit<-poilog::poilogMLE(x,startVals=st,zTrunc=FALSE,method=om,...)
   #mle<-fit$par
@@ -68,6 +114,19 @@ poilog_mle<-function(x,om="BFGS",...){
   mle
 }
 
+#' @title Negative binomial MLEs
+#' @description Compute the maximum likelihood estimates for parameters of the
+#'   negative binomial distribution.
+#' @name nb_mle
+#'
+#' @param x vector of non-negative integers (the data).
+#' @param ... additional arguments passed to \link[fitdistrplus]{fitdist}.
+#'
+#' @return a named numeric vector containing the MLEs of size,mu (see
+#'   \link[stats]{dnbinom} for details).
+#'   The maximized value of the log-likelihood is attached as an attribute.
+#'
+#' @export
 nb_mle<-function(x,...){
   fit<-fitdistrplus::fitdist(x,"nbinom",keepdata=FALSE,...)
   mle<-coef(fit)
@@ -105,16 +164,57 @@ mle_matrix<-function(m,lik=c("poilog","nb"),...){
   res
 }
 
+#' @title Poisson-lognormal MLEs for columns of a matrix
+#' @description Compute the maximum likelihood estimates for parameters of the
+#'   Poisson-lognormal distribution for each column of a matrix.
+#' @name poilog_mle_matrix
+#'
+#' @param m a matrix or sparse Matrix of non-negative integers (the data).
+#' @param ... additional arguments passed to \link{poilog_mle}.
+#'
+#' @return a data frame whose rows correspond to the columns of m.
+#'   The columns contain the MLEs for the parameters, the log-likelihood, and
+#'   the \link[stats]{BIC} values.
+#'
+#' @export
 poilog_mle_matrix<-function(m,...){
   #mle_matrix for poisson-lognormal
   #result includes mu,sigma params
   mle_matrix(m,"poilog",...)
 }
 
+#' @title Negative binomial MLEs for columns of a matrix
+#' @description Compute the maximum likelihood estimates for parameters of the
+#'   negative binomial distribution for each column of a matrix.
+#' @name nb_mle_matrix
+#'
+#' @param m a matrix or sparse Matrix of non-negative integers (the data).
+#' @param ... additional arguments passed to \link{nb_mle}.
+#'
+#' @return a data frame whose rows correspond to the columns of m.
+#'   The columns contain the MLEs for the parameters, the log-likelihood, and
+#'   the \link[stats]{BIC} values.
+#'
+#' @export
 nb_mle_matrix<-function(m,...){
   mle_matrix(m,"nb",...)
 }
 
+#' @title Estimate negative binomial mean parameter from zero fraction
+#' @description Given a fixed size parameter, use the fraction of zeros to
+#'   estimate the mean parameter of a negative binomial
+#'   distribution via the method of moments.
+#' @name nb_pzero2mu
+#'
+#' @param lpz a numeric vector representing the natural log of the empirical
+#'   fraction of zeros from count data.
+#' @param size either a positive scalar or a vector of same length as lpz
+#'   specifying the fixed size parameter (see \link[stats]{dnbinom}).
+#'
+#' @return a numeric vector of estimated scale parameters for each element of
+#'   lpz.
+#'
+#' @export
 nb_pzero2mu<-function(lpz,size){
   #Assuming the data follows a negative binomial distribution
   #if we fix the size parameter to a specified value
@@ -124,6 +224,23 @@ nb_pzero2mu<-function(lpz,size){
   size*expm1(-lpz/size)
 }
 
+#' @title Estimate Poisson-lognormal scale parameter from zero fraction
+#' @description Given a fixed sigma parameter, use the fraction of zeros to
+#'   estimate the mu parameter of a Poisson-lognormal
+#'   distribution via the method of moments.
+#' @name poilog_pzero2mu
+#'
+#' @param lpz a numeric vector representing the natural log of the empirical
+#'   fraction of zeros from count data.
+#' @param sig either a positive scalar or a vector of same length as lpz
+#'   specifying the fixed sigma parameter (see \link[sads]{dpoilog}).
+#' @param lims interval of possible values for the scale
+#'   parameter (mu), passed to \link[stats]{uniroot}.
+#'
+#' @return a numeric vector of estimated scale parameters (mu) for each element
+#' of lpz.
+#'
+#' @export
 poilog_pzero2mu<-function(lpz,sig=2.5,lims=c(-100,100)){
   #Assuming the data follows a Poisson-lognormal
   #if we fix the 'sig' parameter to a specified value

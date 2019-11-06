@@ -40,7 +40,7 @@
 #'   pre-computed based on the Uniform(0,1) distribution.
 #'
 #' @return a vector of (log) probabilities
-#' @import statmod,matrixStats
+#'
 #' @export
 dnblomax<-function(x, tail=1, scale=1, shape=1, log=FALSE, quadpts=1000){
   if(is.list(quadpts)){
@@ -84,6 +84,7 @@ dplomax<-function(x,...){ dnblomax(x,shape=Inf,...) }
 #'
 #' @return a list with components x and y of the points that were drawn is
 #'   returned invisibly.
+#'
 #' @export
 llcurve_lomax<-function(xmax, lpar=c(1,1,1), lik=c("nb","geom","poi"), q=1000,
                         add=TRUE, ...){
@@ -100,7 +101,6 @@ llcurve_lomax<-function(xmax, lpar=c(1,1,1), lik=c("nb","geom","poi"), q=1000,
   curve(f,from=0,to=log1p(xmax),add=add,...)
 }
 
-#' @import statmod
 nblomax_score<-function(x,tail=1,scale=1,shape=1,quadpts=1000,fix_shape=FALSE){
   #the gradient of the log likelihood (data=x) at each data point
   #returns matrix with length(x) rows and num_params cols
@@ -170,7 +170,6 @@ nblomax_score<-function(x,tail=1,scale=1,shape=1,quadpts=1000,fix_shape=FALSE){
 #' @return a named numeric vector containing the MLEs of tail, scale, and shape
 #'   the maximized value of the log-likelihood is attached as an attribute.
 #'
-#' @import statmod
 #' @export
 nblomax_mle<-function(x, quadpts=1000, m=rep(0,3), s=rep(Inf,3), shape=NULL,
                       om="BFGS", ...){
@@ -239,7 +238,6 @@ glomax_mle<-function(x,...){ nblomax_mle(x,shape=1,...) }
 #'   The columns contain the MLEs for the parameters, the log-likelihood, and
 #'   the \link[stats]{BIC} values.
 #'
-#' @import slam
 #' @export
 nblomax_mle_matrix<-function(m,quadpts=1000,maxtry=10,verbose=FALSE,...){
   #m a matrix of counts (0,1,2,...)
