@@ -386,18 +386,18 @@ rlomax<-function(n,tail=1.01,scale=1,logscale=FALSE){
   rburr(n,scale,k=tail,shape=1,is_median=FALSE,logscale=logscale)
 }
 
-rplomax<-function(n,tail=1.01,scale=1,cut=Inf){
+rplomax<-function(n,tail=1.01,scale=1){
   #poisson with lomax prior
-  mu<-rlomax(n,tail=tail,scale=scale,logscale=FALSE,cut=cut)
+  mu<-rlomax(n,tail=tail,scale=scale,logscale=FALSE)
   stats::rpois(n,mu)
 }
 
-rglomax<-function(n,tail=1.01,scale=1,cut=Inf){
-  lmu<-rlomax(n,tail=tail,scale=scale,logscale=TRUE,cut=cut)
+rglomax<-function(n,tail=1.01,scale=1){
+  lmu<-rlomax(n,tail=tail,scale=scale,logscale=TRUE)
   stats::rgeom(n,stats::plogis(lmu,lower.tail=FALSE))
 }
 
-rnblomax<-function(n,tail=1.01,scale=1,shape=1,cut=Inf){
-  mu<-rlomax(n,tail=tail,scale=scale,logscale=FALSE,cut=cut)
+rnblomax<-function(n,tail=1.01,scale=1,shape=1){
+  mu<-rlomax(n,tail=tail,scale=scale,logscale=FALSE)
   stats::rnbinom(n,size=shape,mu=mu)
 }
