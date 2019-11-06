@@ -12,7 +12,7 @@ Authors@R: c(person("F. William", "Townes", email = "will.townes@gmail.com",
             role="aut"))
 License: LGPL (>= 3) | file LICENSE
 Depends:
-    R (>= 3.5)
+    R (>= 3.6)
 Imports:
     fitdistrplus,
     graphics,
@@ -23,7 +23,8 @@ Imports:
     slam,
     statmod,
     stats,
-    utils
+    utils,
+    BiocParallel
 Suggests:
     knitr
 URL: https://github.com/willtownes/quminorm
