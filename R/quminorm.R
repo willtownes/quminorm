@@ -1,8 +1,6 @@
 #Quasi-UMIs:
 #estimate scale parameter using only the fraction of zeros
 #quantile normalization to a Poisson-Lomax or Geometric-Lomax
-#source("./algs/nblomax.R")
-#source("./algs/poilog.R")
 
 #x,y must be scalars!
 #' @importFrom matrixStats logSumExp
@@ -110,9 +108,7 @@ quminorm_plomax<-function(x,shape,sc=NULL,quadpts=1000){
   x #quantile normalized version of x
 }
 
-#' @importFrom stats dnbinom
-#' @importFrom stats qnbinom
-#' @importFrom stats pnbinom
+#' @importFrom stats dnbinom qnbinom pnbinom
 quminorm_nb<-function(x,shape,sc=NULL,quadpts=NULL){
   #shape=size, sc=mu
   #size,mu are params of negative binomial as in dnbinom
