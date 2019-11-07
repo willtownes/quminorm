@@ -28,5 +28,8 @@ a list with components x and y of the points that were drawn is
 }
 \description{
 Draw the probability mass function of a negative binomial-Lomax
-  distribution with both horizontal and vertical axes log transformed.
+distribution with both horizontal and vertical axes log transformed.
+}
+\seealso{
+\code{\link{lpmf}}
 }

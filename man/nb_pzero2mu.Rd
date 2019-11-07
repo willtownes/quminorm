@@ -19,6 +19,6 @@ a numeric vector of estimated scale parameters for each element of
 }
 \description{
 Given a fixed size parameter, use the fraction of zeros to
-  estimate the mean parameter of a negative binomial
-  distribution via the method of moments.
+estimate the mean parameter of a negative binomial
+distribution via the method of moments.
 }

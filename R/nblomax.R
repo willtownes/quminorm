@@ -9,10 +9,25 @@
 # mu = lambda*(exp(z/alpha)-1)
 # Lomax prior is conjugate to neg binom only if lambda=phi, see bnbinom.R
 
-#' @title Negative binomial-Lomax PMF
-#' @description Compute probability mass function of a negative binomial
-#'   distribution with mean parameter distributed as Lomax.
-#' @name dnblomax
+#' Negative binomial-Lomax PMF
+#'
+#' Compute probability mass function of a negative binomial
+#' distribution with mean parameter distributed as Lomax.
+#'
+#' This function computes the likelihood the data x was generated
+#' from the model mu~Lomax(tail,scale), x~negative binomial(shape,mu).
+#' If the shape parameter is Inf this is a Poisson-Lomax model. If shape is 1,
+#' it is a geometric-Lomax model. The Lomax mixing distribution induces
+#' a heavy power-law tail with exponent (1+tail). The smaller the tail
+#' parameter, the heavier the tail of the distribution. If tail<=1 there is no
+#' mean, if tail<2 there is no variance. A larger scale parameter means fewer
+#' zeros and more large values. Shape and scale have no effect on the
+#' power-law tail. If quadpts is a number, the quadrature points are
+#' recomputed based on current parameter values. If quadpts is a list, we
+#' assume it is the result of a call to
+#' quadpts<-statmod::gauss.quad.prob(m, dist="uniform", l=0, u=1)
+#' where m is the number of quadrature points, ie that the quadpts are
+#' pre-computed based on the Uniform(0,1) distribution.
 #'
 #' @param x a vector of (non-negative integer) quantiles.
 #' @param tail a positive scalar controlling the heaviness of the Lomax tail.
@@ -23,21 +38,6 @@
 #'   points, or a list resulting from
 #'   statmod::gauss.quad.prob(m, dist="uniform", l=0, u=1)
 #'   where m is the number of quadrature points.
-#'
-#' @details This function computes the likelihood the data x was generated
-#'   from the model mu~Lomax(tail,scale), x~negative binomial(shape,mu).
-#'   If the shape parameter is Inf this is a Poisson-Lomax model. If shape is 1,
-#'   it is a geometric-Lomax model. The Lomax mixing distribution induces
-#'   a heavy power-law tail with exponent (1+tail). The smaller the tail
-#'   parameter, the heavier the tail of the distribution. If tail<=1 there is no
-#'   mean, if tail<2 there is no variance. A larger scale parameter means fewer
-#'   zeros and more large values. Shape and scale have no effect on the
-#'   power-law tail. If quadpts is a number, the quadrature points are
-#'   recomputed based on current parameter values. If quadpts is a list, we
-#'   assume it is the result of a call to
-#'   quadpts<-statmod::gauss.quad.prob(m, dist="uniform", l=0, u=1)
-#'   where m is the number of quadrature points, ie that the quadpts are
-#'   pre-computed based on the Uniform(0,1) distribution.
 #'
 #' @return a vector of (log) probabilities
 #'
@@ -74,10 +74,10 @@ dglomax<-function(x,...){ dnblomax(x,shape=1,...) }
 
 dplomax<-function(x,...){ dnblomax(x,shape=Inf,...) }
 
-#' @title Log-log curve for negative binomial-Lomax PMF
-#' @description Draw the probability mass function of a negative binomial-Lomax
-#'   distribution with both horizontal and vertical axes log transformed.
-#' @name llcurve_lomax
+#' Log-log curve for negative binomial-Lomax PMF
+#'
+#' Draw the probability mass function of a negative binomial-Lomax
+#' distribution with both horizontal and vertical axes log transformed.
 #'
 #' @param xmax the maximum quantile at which to evaluate the PMF.
 #' @param lpar numeric vector containing the tail, scale, and shape parameters
@@ -90,6 +90,8 @@ dplomax<-function(x,...){ dnblomax(x,shape=Inf,...) }
 #'
 #' @return a list with components x and y of the points that were drawn is
 #'   returned invisibly.
+#'
+#' @seealso \code{\link{lpmf}}
 #'
 #' @export
 llcurve_lomax<-function(xmax, lpar=c(1,1,1), lik=c("nb","geom","poi"), q=1000,
@@ -155,10 +157,10 @@ nblomax_score<-function(x,tail=1,scale=1,shape=1,quadpts=1000,fix_shape=FALSE){
   res
 }
 
-#' @title Negative binomial-Lomax MLEs
-#' @description Compute the maximum likelihood estimates for parameters of the
-#'   negative binomial-Lomax distribution.
-#' @name nblomax_mle
+#' Negative binomial-Lomax MLEs
+#'
+#' Compute the maximum likelihood estimates for parameters of the
+#' negative binomial-Lomax distribution.
 #'
 #' @param x vector of non-negative integers (the data).
 #' @param quadpts positive integer, number of quadrature points.
@@ -230,10 +232,10 @@ plomax_mle<-function(x,...){ nblomax_mle(x,shape=Inf,...) }
 
 glomax_mle<-function(x,...){ nblomax_mle(x,shape=1,...) }
 
-#' @title Negative binomial-Lomax MLEs for columns of a matrix
-#' @description Compute the maximum likelihood estimates for parameters of the
-#'   negative binomial-Lomax distribution for each column of a matrix
-#' @name nblomax_mle_matrix
+#' Negative binomial-Lomax MLEs for columns of a matrix
+#'
+#' Compute the maximum likelihood estimates for parameters of the
+#' negative binomial-Lomax distribution for each column of a matrix
 #'
 #' @param m a matrix or sparse Matrix of non-negative integers (the data).
 #' @param quadpts positive integer, number of quadrature points.
@@ -291,12 +293,11 @@ plomax_mle_matrix<-function(m,...){ nblomax_mle_matrix(m,shape=Inf,...) }
 
 glomax_mle_matrix<-function(m,...){ nblomax_mle_matrix(m,shape=1,...) }
 
-#' @title Estimate Poisson- or geometric-Lomax scale parameter from zero
-#'   fraction
-#' @description Given a fixed tail parameter, use the fraction of zeros to
-#'   estimate the scale parameter of a Poisson-Lomax or geometric-Lomax
-#'   distribution via the method of moments.
-#' @name pglomax_pzero2scale
+#' Estimate Poisson- or geometric-Lomax scale parameter from zero fraction
+#'
+#' Given a fixed tail parameter, use the fraction of zeros to
+#' estimate the scale parameter of a Poisson-Lomax or geometric-Lomax
+#' distribution via the method of moments.
 #'
 #' @param lpz a numeric vector representing the natural log of the empirical
 #'   fraction of zeros from count data.
@@ -309,7 +310,6 @@ glomax_mle_matrix<-function(m,...){ nblomax_mle_matrix(m,shape=1,...) }
 #'
 #' @return a numeric vector of estimated scale parameters for each element of
 #'   lpz.
-#'
 pglomax_pzero2scale<-function(lpz, lik=c("poisson","geometric"), tail=0.8,
                               quadpts=1000, lims=c(1e-6,100)){
   #Assuming the data follows a Poisson-Lomax
@@ -356,9 +356,18 @@ rburr<-function(n,lambda,k=1.01,shape=1,is_median=TRUE,logscale=FALSE){
   return(exp(lx))
 }
 
-#' @title Lomax random number generation
-#' @description Draw random samples from the Lomax distribution
-#' @name rlomax
+#' Lomax random number generation
+#'
+#' Draw random samples from the Lomax distribution
+#'
+#' The density function of the Lomax distribution is given by
+#' \eqn{f(x)=\frac{\alpha}{\lambda}\left(1+\frac{x}{\lambda}\right)^{-(\alpha+1)}}
+#' where \eqn{\alpha,\lambda} are the tail and scale parameters, respectively.
+#' Lomax has a heavy power-law tail with exponent (1+tail). The smaller the
+#' tail parameter, the heavier the tail of the distribution. If tail<=1 there
+#' is no mean, if tail<2 there is no variance. A larger scale parameter means
+#' fewer zeros and more large values. The scale parameter has no effect on the
+#' power-law tail.
 #'
 #' @param n a positive scalar indicating the number of random variables to draw.
 #' @param tail a positive scalar controlling the heaviness of the Lomax tail.
@@ -366,19 +375,10 @@ rburr<-function(n,lambda,k=1.01,shape=1,is_median=TRUE,logscale=FALSE){
 #' @param logscale logical; if TRUE, the natural log of the random variables is
 #'   returned instead of the variables themselves.
 #'
-#' @details  The density function of the Lomax distribution is given by
-#'   \eqn{f(x)=\frac{\alpha}{\lambda}\left(1+\frac{x}{\lambda}\right)^{-(\alpha+1)}}
-#'   where \eqn{\alpha,\lambda} are the tail and scale parameters, respectively.
-#'   Lomax has a heavy power-law tail with exponent (1+tail). The smaller the
-#'   tail parameter, the heavier the tail of the distribution. If tail<=1 there
-#'   is no mean, if tail<2 there is no variance. A larger scale parameter means
-#'   fewer zeros and more large values. The scale parameter has no effect on the
-#'   power-law tail.
-#'
 #' @return a vector of (possibly log-transformed) Lomax distributed random
 #'   variates.
 #'
-#' @seealso dnblomax
+#' @seealso \code{\link{dnblomax}},\code{\link[VGAM]{rlomax}}
 #'
 #' @export
 rlomax<-function(n,tail=1.01,scale=1,logscale=FALSE){

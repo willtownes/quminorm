@@ -2,8 +2,7 @@
 % Please edit documentation in R/nblomax.R
 \name{pglomax_pzero2scale}
 \alias{pglomax_pzero2scale}
-\title{Estimate Poisson- or geometric-Lomax scale parameter from zero
-  fraction}
+\title{Estimate Poisson- or geometric-Lomax scale parameter from zero fraction}
 \usage{
 pglomax_pzero2scale(lpz, lik = c("poisson", "geometric"), tail = 0.8,
   quadpts = 1000, lims = c(1e-06, 100))
@@ -28,6 +27,6 @@ a numeric vector of estimated scale parameters for each element of
 }
 \description{
 Given a fixed tail parameter, use the fraction of zeros to
-  estimate the scale parameter of a Poisson-Lomax or geometric-Lomax
-  distribution via the method of moments.
+estimate the scale parameter of a Poisson-Lomax or geometric-Lomax
+distribution via the method of moments.
 }

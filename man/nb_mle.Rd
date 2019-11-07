@@ -18,5 +18,5 @@ a named numeric vector containing the MLEs of size,mu (see
 }
 \description{
 Compute the maximum likelihood estimates for parameters of the
-  negative binomial distribution.
+negative binomial distribution.
 }

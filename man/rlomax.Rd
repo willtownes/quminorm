@@ -25,14 +25,14 @@ Draw random samples from the Lomax distribution
 }
 \details{
 The density function of the Lomax distribution is given by
-  \eqn{f(x)=\frac{\alpha}{\lambda}\left(1+\frac{x}{\lambda}\right)^{-(\alpha+1)}}
-  where \eqn{\alpha,\lambda} are the tail and scale parameters, respectively.
-  Lomax has a heavy power-law tail with exponent (1+tail). The smaller the
-  tail parameter, the heavier the tail of the distribution. If tail<=1 there
-  is no mean, if tail<2 there is no variance. A larger scale parameter means
-  fewer zeros and more large values. The scale parameter has no effect on the
-  power-law tail.
+\eqn{f(x)=\frac{\alpha}{\lambda}\left(1+\frac{x}{\lambda}\right)^{-(\alpha+1)}}
+where \eqn{\alpha,\lambda} are the tail and scale parameters, respectively.
+Lomax has a heavy power-law tail with exponent (1+tail). The smaller the
+tail parameter, the heavier the tail of the distribution. If tail<=1 there
+is no mean, if tail<2 there is no variance. A larger scale parameter means
+fewer zeros and more large values. The scale parameter has no effect on the
+power-law tail.
 }
 \seealso{
-dnblomax
+\code{\link{dnblomax}},\code{\link[VGAM]{rlomax}}
 }

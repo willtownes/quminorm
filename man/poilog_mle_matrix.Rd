@@ -18,5 +18,5 @@ a data frame whose rows correspond to the columns of m.
 }
 \description{
 Compute the maximum likelihood estimates for parameters of the
-  Poisson-lognormal distribution for each column of a matrix.
+Poisson-lognormal distribution for each column of a matrix.
 }

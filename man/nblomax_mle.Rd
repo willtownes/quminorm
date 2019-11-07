@@ -35,5 +35,5 @@ a named numeric vector containing the MLEs of tail, scale, and shape
 }
 \description{
 Compute the maximum likelihood estimates for parameters of the
-  negative binomial-Lomax distribution.
+negative binomial-Lomax distribution.
 }

@@ -28,23 +28,23 @@ a vector of (log) probabilities
 }
 \description{
 Compute probability mass function of a negative binomial
-  distribution with mean parameter distributed as Lomax.
+distribution with mean parameter distributed as Lomax.
 }
 \details{
 This function computes the likelihood the data x was generated
-  from the model mu~Lomax(tail,scale), x~negative binomial(shape,mu).
-  If the shape parameter is Inf this is a Poisson-Lomax model. If shape is 1,
-  it is a geometric-Lomax model. The Lomax mixing distribution induces
-  a heavy power-law tail with exponent (1+tail). The smaller the tail
-  parameter, the heavier the tail of the distribution. If tail<=1 there is no
-  mean, if tail<2 there is no variance. A larger scale parameter means fewer
-  zeros and more large values. Shape and scale have no effect on the
-  power-law tail. If quadpts is a number, the quadrature points are
-  recomputed based on current parameter values. If quadpts is a list, we
-  assume it is the result of a call to
-  quadpts<-statmod::gauss.quad.prob(m, dist="uniform", l=0, u=1)
-  where m is the number of quadrature points, ie that the quadpts are
-  pre-computed based on the Uniform(0,1) distribution.
+from the model mu~Lomax(tail,scale), x~negative binomial(shape,mu).
+If the shape parameter is Inf this is a Poisson-Lomax model. If shape is 1,
+it is a geometric-Lomax model. The Lomax mixing distribution induces
+a heavy power-law tail with exponent (1+tail). The smaller the tail
+parameter, the heavier the tail of the distribution. If tail<=1 there is no
+mean, if tail<2 there is no variance. A larger scale parameter means fewer
+zeros and more large values. Shape and scale have no effect on the
+power-law tail. If quadpts is a number, the quadrature points are
+recomputed based on current parameter values. If quadpts is a list, we
+assume it is the result of a call to
+quadpts<-statmod::gauss.quad.prob(m, dist="uniform", l=0, u=1)
+where m is the number of quadrature points, ie that the quadpts are
+pre-computed based on the Uniform(0,1) distribution.
 }
 \seealso{
 rlomax

@@ -20,5 +20,5 @@ a named numeric vector containing the MLEs of mu,sigma (see
 }
 \description{
 Compute the maximum likelihood estimates for parameters of the
-  Poisson-lognormal distribution.
+Poisson-lognormal distribution.
 }

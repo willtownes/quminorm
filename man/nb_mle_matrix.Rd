@@ -18,5 +18,5 @@ a data frame whose rows correspond to the columns of m.
 }
 \description{
 Compute the maximum likelihood estimates for parameters of the
-  negative binomial distribution for each column of a matrix.
+negative binomial distribution for each column of a matrix.
 }

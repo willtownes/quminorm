@@ -22,6 +22,6 @@ of lpz.
 }
 \description{
 Given a fixed sigma parameter, use the fraction of zeros to
-  estimate the mu parameter of a Poisson-lognormal
-  distribution via the method of moments.
+estimate the mu parameter of a Poisson-lognormal
+distribution via the method of moments.
 }
