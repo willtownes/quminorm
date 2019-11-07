@@ -1,0 +1,38 @@
+---
+title: "Applying quasi-UMI normalization to data"
+author: "Will Townes"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteEngine{knitr::knitr}
+  %\VignetteIndexEntry{Applying quasi-UMI normalization to data}
+  %\usepackage[UTF-8]{inputenc}
+---
+
+# Applying quasi-UMI normalization to data
+
+## Load packages and example data
+
+```{r}
+library(scater)
+library(quminorm)
+library(glmpca)
+library(scRNAseq)
+library(ggplot2)
+```
+
+Data with UMI counts
+
+```{r}
+zeisel <- ZeiselBrainData()
+zeisel <- zeisel[rowData(zeisel)$featureType!="repeat",]
+
+zeisel <- aggregateAcrossFeatures(zeisel, 
+    id=sub("_loc[0-9]+$", "", rownames(zeisel)))
+```
+
+Data with read counts
+
+```{r}
+
+```
