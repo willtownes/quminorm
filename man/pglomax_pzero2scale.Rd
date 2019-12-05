@@ -4,8 +4,13 @@
 \alias{pglomax_pzero2scale}
 \title{Estimate Poisson- or geometric-Lomax scale parameter from zero fraction}
 \usage{
-pglomax_pzero2scale(lpz, lik = c("poisson", "geometric"), tail = 0.8,
-  quadpts = 1000, lims = c(1e-06, 100))
+pglomax_pzero2scale(
+  lpz,
+  lik = c("poisson", "geometric"),
+  tail = 0.8,
+  quadpts = 1000,
+  lims = c(1e-06, 100)
+)
 }
 \arguments{
 \item{lpz}{a numeric vector representing the natural log of the empirical

@@ -4,8 +4,12 @@
 \alias{quminorm_ERCC_opt}
 \title{ERCC-optimization of quminorm shape}
 \usage{
-quminorm_ERCC_opt(m, ERCC_conc_data, shapeVals = seq(1.4, 2.6, 0.1),
-  quadpts = 1000)
+quminorm_ERCC_opt(
+  m,
+  ERCC_conc_data,
+  shapeVals = seq(1.4, 2.6, 0.1),
+  quadpts = 1000
+)
 }
 \arguments{
 \item{m}{a matrix or sparse Matrix of non-negative integers (count data).}

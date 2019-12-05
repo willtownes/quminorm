@@ -4,8 +4,7 @@
 \alias{nblomax_mle_matrix}
 \title{Negative binomial-Lomax MLEs for columns of a matrix}
 \usage{
-nblomax_mle_matrix(m, quadpts = 1000, maxtry = 10, verbose = FALSE,
-  ...)
+nblomax_mle_matrix(m, quadpts = 1000, maxtry = 10, verbose = FALSE, ...)
 }
 \arguments{
 \item{m}{a matrix or sparse Matrix of non-negative integers (the data).}

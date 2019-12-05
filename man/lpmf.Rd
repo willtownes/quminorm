@@ -4,8 +4,17 @@
 \alias{lpmf}
 \title{Log-log plot}
 \usage{
-lpmf(x, bw = 0.25, logbase = NULL, discrete = TRUE, midpt = FALSE,
-  bin_thresh = 10, add = FALSE, doplot = TRUE, ...)
+lpmf(
+  x,
+  bw = 0.25,
+  logbase = NULL,
+  discrete = TRUE,
+  midpt = FALSE,
+  bin_thresh = 10,
+  add = FALSE,
+  doplot = TRUE,
+  ...
+)
 }
 \arguments{
 \item{x}{a vector of non-negative integers or decimal values (the data).}

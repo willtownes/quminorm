@@ -4,8 +4,7 @@
 \alias{dnblomax}
 \title{Negative binomial-Lomax PMF}
 \usage{
-dnblomax(x, tail = 1, scale = 1, shape = 1, log = FALSE,
-  quadpts = 1000)
+dnblomax(x, tail = 1, scale = 1, shape = 1, log = FALSE, quadpts = 1000)
 }
 \arguments{
 \item{x}{a vector of (non-negative integer) quantiles.}

@@ -4,8 +4,14 @@
 \alias{llcurve_lomax}
 \title{Log-log curve for negative binomial-Lomax PMF}
 \usage{
-llcurve_lomax(xmax, lpar = c(1, 1, 1), lik = c("nb", "geom", "poi"),
-  q = 1000, add = TRUE, ...)
+llcurve_lomax(
+  xmax,
+  lpar = c(1, 1, 1),
+  lik = c("nb", "geom", "poi"),
+  q = 1000,
+  add = TRUE,
+  ...
+)
 }
 \arguments{
 \item{xmax}{the maximum quantile at which to evaluate the PMF.}

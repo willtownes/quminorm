@@ -4,8 +4,15 @@
 \alias{nblomax_mle}
 \title{Negative binomial-Lomax MLEs}
 \usage{
-nblomax_mle(x, quadpts = 1000, m = rep(0, 3), s = rep(Inf, 3),
-  shape = NULL, om = "BFGS", ...)
+nblomax_mle(
+  x,
+  quadpts = 1000,
+  m = rep(0, 3),
+  s = rep(Inf, 3),
+  shape = NULL,
+  om = "BFGS",
+  ...
+)
 }
 \arguments{
 \item{x}{vector of non-negative integers (the data).}

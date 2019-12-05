@@ -4,8 +4,7 @@
 \alias{llcurve_poilog}
 \title{Log-log curve for Poisson-lognormal PMF}
 \usage{
-llcurve_poilog(xmax, lpar, add = TRUE, use_sads = TRUE,
-  quadpts = 1000, ...)
+llcurve_poilog(xmax, lpar, add = TRUE, use_sads = TRUE, quadpts = 1000, ...)
 }
 \arguments{
 \item{xmax}{the maximum quantile at which to evaluate the PMF.}
