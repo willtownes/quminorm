@@ -53,6 +53,6 @@ sce <- ReprocessedAllenData("tophat_counts")
 tpm(sce) <- assay(sce, "tophat_counts")
 
 #Then run the function
-sce <- quminorm(sce)
+sce <- quminorm(sce[,seq_len(10)])
 
 }

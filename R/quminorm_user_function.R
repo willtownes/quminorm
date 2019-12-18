@@ -42,10 +42,12 @@ quminorm <-function(m, assayName = "tpm", shape = 2,
     #returns a matrix of same dims that has been quantile normalized
     #shape should be a scalar
     #... additional args such as quadpts passed to quminorm functions
+
     if(inherits(m, "SingleCellExperiment")){
         fullM <- m
         m <- assay(m, assayName)
-    }
+        sce <- TRUE
+    } else {sce <- FALSE}
     lik<-match.arg(lik)
     qfunc<-switch(lik,poilog=quminorm_poilog,plomax=quminorm_plomax,nb=quminorm_nb)
     res<-0*m
@@ -54,7 +56,7 @@ quminorm <-function(m, assayName = "tpm", shape = 2,
         message(paste0("Column ", i," of ", ncol(m), " processed"))
     }
 
-    if(missing(fullM) == FALSE){
+    if(sce){
         prevAssayNames <- assayNames(fullM)
         assay(fullM, length(assays(fullM))+1) <- res
         assayNames(fullM) <- c(prevAssayNames, "qumi")
