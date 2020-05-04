@@ -1,4 +1,18 @@
-# sparse Apply functions
+####### Miscellaneous utility functions ##########
+
+####### logsumexp functions #######
+
+#x,y must be scalars!
+#' @importFrom matrixStats logSumExp
+logspace_add<-function(x,y){ logSumExp(c(x,y)) }
+
+log_cumsum_exp<-function(lp){
+    #lp a vector of log probabilities
+    #returns the log of the cumulative sum of the probabilities
+    Reduce(logspace_add,lp,accumulate=TRUE)
+}
+
+####### sparse Matrix colapply functions #######
 
 #' @importFrom slam as.simple_triplet_matrix colapply_simple_triplet_matrix
 colapply_full<-function(X,FUN,...){
@@ -14,6 +28,7 @@ colapply_full<-function(X,FUN,...){
 #' @importFrom Matrix nnzero
 listCols<-function(m){
     #converts a sparse Matrix into a list of its columns
+    #each list item contains only the nonzero elements of the column
     res<-split(m@x, findInterval(seq_len(nnzero(m)), m@p, left.open=TRUE))
     names(res)<-colnames(m)
     res

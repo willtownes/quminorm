@@ -2,16 +2,6 @@
 #estimate scale parameter using only the fraction of zeros
 #quantile normalization to a Poisson-Lomax or Geometric-Lomax
 
-#x,y must be scalars!
-#' @importFrom matrixStats logSumExp
-logspace_add<-function(x,y){ logSumExp(c(x,y)) }
-
-log_cumsum_exp<-function(lp){
-  #lp a vector of log probabilities
-  #returns the log of the cumulative sum of the probabilities
-  Reduce(logspace_add,lp,accumulate=TRUE)
-}
-
 make_cdf_nz<-function(thresh,dfunc,maxval=1e6){
   #dfunc=some log-pmf function accepting a single argument (the data)
   #let cdf be the cdf corresponding to dfunc
