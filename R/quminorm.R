@@ -66,9 +66,10 @@ quminorm_inner<-function(xnz,cdf_nz,nnz=length(xnz)){
   targets[xmap]
 }
 
-quminorm_poilog<-function(x,shape,sc=NULL,quadpts=1000,err2na=TRUE){
+#' @importFrom sads dpoilog
+quminorm_poilog<-function(x,shape,sc=NULL,err2na=TRUE){
   #shape=sig, sc=mu
-  #sig,mu are params of lognormal as in poilog::dpoilog and sads::dpoilog
+  #sig,mu are params of lognormal as in sads::dpoilog
   #returns a quantile normalized version of the data x with zeros unchanged
   n<-length(x)
   nzi<-which(x>0)
