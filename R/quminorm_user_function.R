@@ -29,6 +29,7 @@
 #' #Then run the function
 #' sce <- quminorm(sce[,seq_len(10)])
 #'
+#' @importFrom SummarizedExperiment assay assayNames assay<- assays assayNames<-
 #' @export quminorm
 quminorm <-function(m, assayName = "tpm", shape = 2){
     #m a matrix with samples in the columns

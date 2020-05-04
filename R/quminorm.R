@@ -2,6 +2,7 @@
 #estimate scale parameter using only the fraction of zeros
 #quantile normalization to a Poisson-Lomax or Geometric-Lomax
 
+#' @importFrom utils tail
 make_cdf_nz<-function(thresh,dfunc,maxval=1e6){
   #dfunc=some log-pmf function accepting a single argument (the data)
   #let cdf be the cdf corresponding to dfunc
@@ -70,7 +71,7 @@ quminorm_poilog<-function(x,shape,sc=NULL,err2na=TRUE){
     lpz<-log(n-nnz)-log(n) #log(fraction of zeros)
     sc<-poilog_pzero2mu(lpz,sig=shape)
   }
-  dfunc<-function(x){ dpoilog(x,mu=sc,sig=shape,quadpts=quadpts,log=TRUE) }
+  dfunc<-function(x){ dpoilog(x,mu=sc,sig=shape,log=TRUE) }
   pmf0<-exp(dfunc(0))
   #threshold for cdf on the regular scale such that
   #zero truncated cdf (cdf_nz) extends beyond the 1-1/nnz threshold

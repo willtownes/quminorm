@@ -35,6 +35,7 @@ poilog_mle<-function(x,om="BFGS",...){
 #'   The columns contain the MLEs for the parameters, the log-likelihood, and
 #'   the \code{\link[stats]{BIC}} values.
 #'
+#' @importFrom methods is
 #' @export
 poilog_mle_matrix<-function(m,...){
   #m a matrix with samples in the columns

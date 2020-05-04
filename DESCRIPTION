@@ -17,11 +17,20 @@ Depends:
     R (>= 3.6)
 Imports:
     Matrix,
+    matrixStats,
+    methods,
     sads,
     slam,
-    stats
+    stats,
+    SummarizedExperiment,
+    utils
 Suggests:
-    knitr
+    ggplot2,
+    glmpca,
+    knitr,
+    scater,
+    scRNAseq,
+    SingleCellExperiment
 URL: https://github.com/willtownes/quminorm
 BugReports: https://github.com/willtownes/quminorm/issues
 VignetteBuilder: knitr
