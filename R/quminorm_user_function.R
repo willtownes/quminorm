@@ -13,18 +13,12 @@
 #'   evaluated for quasi-UMI generation from transcript counts, as full-length
 #'   data with UMIs has not until very recently been available.
 #' @param shape Positive scalar, a fixed shape parameter for the target
-#'   distribution. The shape parameter represents sigma, tail, and size for the
-#'   Poisson-lognormal, Poisson-Lomax, and negative binomial target
-#'   distributions, respectively. See \code{\link[sads]{dpoilog}},
-#'   \code{\link{dnblomax}}, or \code{\link[stats]{dnbinom}}.
-#' @param lik likelihood of target distribution, either Poisson-lognormal
-#'   ("poilog"), Poisson-Lomax ("plomax"), or negative binomial ("nb").
-#' @param quadpts positive integer, number of quadrature points. Increase for
-#'   greater precision but slower computation.
+#'   distribution. The shape parameter represents sigma for the
+#'   Poisson-lognormal target distribution. See \code{\link[sads]{dpoilog}}.
 #'
 #' @return An object of same class as m but with the nonzero values normalized
 #' to match the target quasi-UMI distribution. In case of a
-#' SingleCellExperiment, the quasiUMI is added to a new asays slot named qumi.
+#' SingleCellExperiment, the quasiUMI is added to a new assays slot named qumi.
 #' @examples
 #' #First import a SingleCellExperiment
 #' library(scRNAseq)
@@ -36,8 +30,7 @@
 #' sce <- quminorm(sce[,seq_len(10)])
 #'
 #' @export quminorm
-quminorm <-function(m, assayName = "tpm", shape = 2,
-                    lik=c("poilog","plomax","nb"), quadpts=1000){
+quminorm <-function(m, assayName = "tpm", shape = 2){
     #m a matrix with samples in the columns
     #returns a matrix of same dims that has been quantile normalized
     #shape should be a scalar
@@ -48,14 +41,11 @@ quminorm <-function(m, assayName = "tpm", shape = 2,
         m <- assay(m, assayName)
         sce <- TRUE
     } else {sce <- FALSE}
-    lik<-match.arg(lik)
-    qfunc<-switch(lik,poilog=quminorm_poilog,plomax=quminorm_plomax,nb=quminorm_nb)
     res<-0*m
     for(i in seq_len(ncol(m))){
-        res[,i]<-qfunc(m[,i],shape,quadpts=quadpts)
+        res[,i]<-quminorm_poilog(m[,i],shape)
         message(paste0("Column ", i," of ", ncol(m), " processed"))
     }
-
     if(sce){
         prevAssayNames <- assayNames(fullM)
         assay(fullM, length(assays(fullM))+1) <- res
@@ -64,5 +54,4 @@ quminorm <-function(m, assayName = "tpm", shape = 2,
     } else {
         res
     }
-
 }
