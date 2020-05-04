@@ -9,22 +9,17 @@ Description: Converts single-cell RNA-seq read counts lacking unique molecular
 Authors@R: c(person("F. William", "Townes", email = "will.townes@gmail.com",
             role = c("aut", "cre", "cph")),
             person("Kelly", "Street", email = "street.kelly@gmail.com", 
+            role="aut"),
+            person("Jakob", "Theorell", email="jakob.theorell@ndcn.ox.ac.uk",
             role="aut"))
 License: LGPL (>= 3) | file LICENSE
 Depends:
     R (>= 3.6)
 Imports:
-    fitdistrplus,
-    graphics,
-    matrixStats,
-    methods,
-    plotrix,
+    Matrix,
     sads,
     slam,
-    statmod,
-    stats,
-    utils,
-    BiocParallel
+    stats
 Suggests:
     knitr
 URL: https://github.com/willtownes/quminorm
@@ -32,4 +27,4 @@ BugReports: https://github.com/willtownes/quminorm/issues
 VignetteBuilder: knitr
 LazyData: false
 Encoding: UTF-8
-RoxygenNote: 7.0.2
+RoxygenNote: 7.1.0

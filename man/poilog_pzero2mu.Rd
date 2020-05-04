@@ -4,7 +4,7 @@
 \alias{poilog_pzero2mu}
 \title{Estimate Poisson-lognormal scale parameter from zero fraction}
 \usage{
-poilog_pzero2mu(lpz, sig = 2.5, lims = c(-100, 100))
+poilog_pzero2mu(lpz, sig = 2.5, lims = c(-200, 200))
 }
 \arguments{
 \item{lpz}{a numeric vector representing the natural log of the empirical
