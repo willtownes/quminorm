@@ -33,12 +33,16 @@ make_cdf_nz<-function(thresh,dfunc,maxval=1e6){
     #update the first pmf value by adding the max cdf to it
     lpmf[1]<-logspace_add(lpmf[1],lcdf_max)
     lcdf<-c(lcdf,log_cumsum_exp(lpmf))
-    lcdf_max<-utils::tail(lcdf,1)
+    lcdf_tail<-tail(lcdf,2) #make sure not to change the "2", it is crucial!
+    if(diff(lcdf_tail)==0){
+      stop("CDF is not increasing, PMF function may have numerical problems!")
+    }
+    lcdf_max<-lcdf_tail[2] #lcdf_tail must be length 2!!
     lo<-hi #100
     hi<-2*hi #200
   }
   if(hi>maxval){
-    stop("Exceeded max value, pmf function may have numerical problems!")
+    stop("Exceeded max value, PMF function may have numerical problems!")
   }
   #remove extra elements of cdf that extend beyond the threshold
   k<-min(which(lcdf>lthresh,arr.ind=TRUE))
@@ -62,7 +66,7 @@ quminorm_inner<-function(xnz,cdf_nz,nnz=length(xnz)){
   targets[xmap]
 }
 
-quminorm_poilog<-function(x,shape,sc=NULL,quadpts=1000){
+quminorm_poilog<-function(x,shape,sc=NULL,quadpts=1000,err2na=TRUE){
   #shape=sig, sc=mu
   #sig,mu are params of lognormal as in poilog::dpoilog and sads::dpoilog
   #returns a quantile normalized version of the data x with zeros unchanged
@@ -80,203 +84,16 @@ quminorm_poilog<-function(x,shape,sc=NULL,quadpts=1000){
   #threshold for cdf on the regular scale such that
   #zero truncated cdf (cdf_nz) extends beyond the 1-1/nnz threshold
   thresh<-(1-1/nnz)*(1-pmf0)+pmf0
-  cdf_nz<-make_cdf_nz(thresh,dfunc)
-  x[nzi]<-quminorm_inner(xnz,cdf_nz,nnz)
+  if(err2na){
+    cdf_nz<-tryCatch(make_cdf_nz(thresh,dfunc),error=function(e){NULL})
+  } else {
+    cdf_nz<-make_cdf_nz(thresh,dfunc)
+  }
+  if(is.null(cdf_nz)){
+    x[nzi]<-NA
+  } else {
+    x[nzi]<-quminorm_inner(xnz,cdf_nz,nnz)
+  }
   x #quantile normalized version of x
 }
 
-quminorm_plomax<-function(x,shape,sc=NULL,quadpts=1000){
-  #shape=tail, sc=scale
-  #tail,sc are the lomax (power law) tail and scale params, see nblomax.R
-  #returns a quantile normalized version of the data x with zeros unchanged
-  n<-length(x)
-  nzi<-which(x>0)
-  xnz<-x[nzi]
-  nnz<-length(xnz)
-  if(is.null(sc)){
-    #assumes at least one gene is a zero count
-    lpz<-log(n-nnz)-log(n) #log(fraction of zeros)
-    sc<-pglomax_pzero2scale(lpz,lik="poisson",tail=shape,quadpts=quadpts)
-  }
-  dfunc<-function(x){ dplomax(x,tail=shape,scale=sc,quadpts=quadpts,log=TRUE) }
-  pmf0<-exp(dfunc(0))
-  #threshold for cdf on the regular scale such that
-  #zero truncated cdf (cdf_nz) extends beyond the 1-1/nnz threshold
-  thresh<-(1-1/nnz)*(1-pmf0)+pmf0
-  cdf_nz<-make_cdf_nz(thresh,dfunc)
-  x[nzi]<-quminorm_inner(xnz,cdf_nz,nnz)
-  x #quantile normalized version of x
-}
-
-#' @importFrom stats dnbinom qnbinom pnbinom
-quminorm_nb<-function(x,shape,sc=NULL,quadpts=NULL){
-  #shape=size, sc=mu
-  #size,mu are params of negative binomial as in dnbinom
-  #returns a quantile normalized version of the data x with zeros unchanged
-  #quadpts is ignored, included only for consistency with other quminorm funcs
-  n<-length(x)
-  nzi<-which(x>0)
-  xnz<-x[nzi]
-  nnz<-length(xnz)
-  if(is.null(sc)){
-    #assumes at least one gene is a zero count
-    lpz<-log(n-nnz)-log(n) #log(fraction of zeros)
-    sc<-nb_pzero2mu(lpz,size=shape)
-  }
-  #dfunc<-function(x){ dnbinom(x,size=shape,mu=sc,log=TRUE) }
-  #pmf0<-exp(dfunc(0))
-  pmf0<-dnbinom(0,size=shape,mu=sc,log=FALSE)
-  #threshold for cdf on the regular scale such that
-  #zero truncated cdf (cdf_nz) extends beyond the 1-1/nnz threshold
-  thresh<-(1-1/nnz)*(1-pmf0)+pmf0
-  qstop<-qnbinom(thresh,size=shape,mu=sc) #an integer
-  #note after normalization all values should be strictly less than qstop
-  cdf<-pnbinom(seq_len(qstop),size=shape,mu=sc)
-  #renormalize CDF for nonzero values only
-  cdf_nz<-(cdf-pmf0)/(1-pmf0)
-  x[nzi]<-quminorm_inner(xnz,cdf_nz,nnz)
-  x #quantile normalized version of x
-}
-
-
-################ visualization functions ################
-
-#' Log-log plot
-#'
-#' Produces a histogram with logarithmic bins and with both the horizontal
-#' and vertical axes log-transformed. Enables visualization of data from
-#' heavy-tailed distributions.
-#'
-#' Heavy-tailed data such as those following power-law type distributions are
-#' difficult to visualize using traditional histograms, because a small number
-#' of points have extremely large values, while all the other points have small
-#' values. A solution is to use logarithmic bins, where the spacing of breaks
-#' increases multiplicatively from left to right. If the x-axis is then
-#' transformed, these bins appear equally spaced. If the y-axis is also
-#' log-transformed, this facilitates comparison to a power-law, since such data
-#' will appear to follow a straight line in a log-log plot. The slope of the
-#' line indicates the exponent of the power law.
-#'
-#' Note that while traditional histograms produce barplots, lpmf produces either
-#' points or lines. The reason for this is the log-transformation of the y-axis
-#' creates negative values, making barplots unattractive. Also, using points
-#' and lines enables multiple data vectors' distributions to be overlayed on
-#' a single plot to facilitate comparisons, whereas it is difficult to stack
-#' many separate histograms in a single plot.
-#'
-#' @param x a vector of non-negative integers or decimal values (the data).
-#' @param bw the bandwidth of the histogram. Increase for more smoothing,
-#'   decrease to make the plot capture small-scale variation.
-#' @param logbase the base of the logarithmic transformation. Defaults to
-#'   natural log.
-#' @param discrete logical; if TRUE, x should contain only integers. In this
-#'   case, the unique values of x with large counts are not combined into bins.
-#' @param midpt logical; if TRUE, the histogram is evaluated at the midpoint of
-#'   the logarithmic bins by geometric mean. If FALSE, uses the left endpoint
-#'   of the bin.
-#' @param bin_thresh positive integer; if x is discrete and the mode of the
-#'   distribution is not zero, finds the smallest unique x value where the
-#'   count is less than bin_thresh. Values larger than this are placed into
-#'   bins, while values smaller than this are not binned.
-#' @param add logical; if TRUE add to an already existing plot using
-#'   \code{lines}. Otherwise make a new plot using \code{plot}.
-#' @param doplot logical; if TRUE produces a plot. Otherwise returns a data
-#'   frame containing the horizontal and vertical coordinates of the plot.
-#' @param ... additional arguments passed to \code{lines} or \code{plot}.
-#'
-#' @export
-lpmf<-function(x, bw=.25, logbase=NULL, discrete=TRUE, midpt=FALSE,
-               bin_thresh=10, add=FALSE, doplot=TRUE, ...){
-  #x a vector of counts or continuous values
-  #bw the bandwidth of the histogram
-  #if midpt=TRUE uses midpoints of bins by geometric mean
-  #if midpt=FALSE uses the left side of the bin
-  #probs: if discrete, convert x to probabilities by dividing by total, handles exact zeros
-  if(is.null(logbase)){ #defaults to base e
-    la<-1
-    xlab<-"log(1+x)"
-  } else {
-    la<-log(logbase)
-    xlab<-paste0("log",logbase,"(1+x)")
-  }
-  bw<-bw*la
-  if(discrete){
-    xt<-table(x)
-    u<-as.integer(names(xt))
-    xd<-diff(xt)
-    #find point where need to start binning
-    if(xd[1]>=0){
-      #account for possible initial increase in the PMF
-      j<-which.max(xt)
-      #find point after the maximum at which it drops below bin_thresh counts
-      i<-min(which(xt[j:length(xt)]>=bin_thresh))+(j-1)
-    } else {
-      #switch point from decreasing to increasing
-      i<-min(which(xd>=0))
-    }
-  } else {
-    i<-1
-  }
-  if(!is.infinite(i)){
-    bmin<-if(i>1){ log(u[i]) } else { log(min(x)) }
-    bmax<-log1p(max(x))
-    blen<-ceiling((bmax-bmin)/bw)
-    bseq<-seq(from=bmin,to=bmax,length.out=max(2,blen))
-    breaks<-exp(bseq)
-    if(i>1) breaks<-c(u[1:(i-1)],breaks)
-  } else {
-    breaks<-c(u[-length(u)],exp(log1p(max(u))))
-  }
-  h<-graphics::hist(x,breaks=breaks,right=FALSE,plot=FALSE)
-  if(midpt){
-    #use geometric mean to get midpoints
-    gmean<-function(t){floor(sqrt(breaks[t]*breaks[t+1]))}
-    xpts<-vapply(seq_along(breaks[-length(breaks)]),gmean,FUN.VALUE=1.0)
-  } else {
-    xpts<-breaks[-length(breaks)]
-  }
-  good<-h$density>0
-  xvals<-log1p(xpts[good])/la
-  yvals<-log(h$density[good])
-  if(doplot){
-    if(add){
-      graphics::lines(xvals,yvals,...)
-    } else {
-      graphics::plot(xvals,yvals,xlab=xlab,ylab="log(density)",...)
-    }
-  } else {
-    return(data.frame(x=xvals,y=yvals))
-  }
-}
-
-lpmf_xtra<-function(lpmf_obj,connect=TRUE,logbase=NULL,...){
-  #lpmf_obj is data frame result of lpmf function with doplot=FALSE
-  #makes a fancier version of lpmf with no pseudocount, logarithmic x-axis
-  #... args passed to plot function
-  res<-lpmf_obj
-  if(is.null(logbase)){
-    res$x<-expm1(res$x)
-  } else {
-    res$x<-logbase^res$x - 1
-  }
-  res$lx<-log(res$x)
-  res$lx[1]<- -log(2)
-  graphics::plot(res$lx,res$y,xaxt="n",...)
-  if(connect){
-    graphics::lines(res$lx[-1],res$y[-1])
-  }
-  graphics::axis(1, at=res$lx, labels=round(res$x,1))
-  plotrix::axis.break(1,-log(2)/2)
-  plotrix::axis.break(3,-log(2)/2)
-}
-
-lsurv<-function(x,...){
-  #x is a random sample from some discrete distribution
-  #plots the log of empirical survival function vs log1p(unique values)
-  xt<-table(x)
-  G<-length(x)
-  ly<-log(G-cumsum(xt))-log(G)
-  ylab<-"log(1-CDF)"
-  lx<-log1p(as.integer(names(ly)))
-  graphics::plot(lx,ly,xlab="log(1+x)",ylab=ylab,...)
-}
