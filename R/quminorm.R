@@ -106,7 +106,7 @@ quminorm_dense<-function(m,shape,mc.cores=1){
     }
   } else {
     res<-colapply_dense_parallel(m,quminorm_poilog,shape,mc.cores=mc.cores)
-    m[,]<-unlist(res)
+    m[,]<-as.numeric(unlist(res))
   }
   m
 }
@@ -118,6 +118,7 @@ quminorm_sparse<-function(m,shape,mc.cores=1){
   m<-as(drop0(m), "CsparseMatrix") #make sure it is column-oriented sparsity
   qmlist<-colapply_sparse_nonzero(m, quminorm_poilog_nz, n=nrow(m),
                            shape=shape, mc.cores=mc.cores)
-  m@x<-unlist(qmlist) #replace all nonzero elements with stacked cols vector
+  #replace all nonzero elements with stacked cols vector
+  m@x<-as.numeric(unlist(qmlist))
   m #return sparse matrix
 }
