@@ -58,14 +58,15 @@ quminorm_inner<-function(xnz,cdf_nz,nnz=length(xnz)){
 }
 
 #' @importFrom sads dpoilog
-quminorm_poilog<-function(x,shape,sc=NULL,err2na=TRUE){
+quminorm_poilog_nz<-function(xnz,n,shape,sc=NULL,err2na=TRUE){
+  #xnz: a data vector with only the positive counts
+  #n: the length of the data vector if the zero counts were also included
+  #the number of zeros is implied to be n-length(xnz)
   #shape=sig, sc=mu
   #sig,mu are params of lognormal as in sads::dpoilog
-  #returns a quantile normalized version of the data x with zeros unchanged
-  n<-length(x)
-  nzi<-which(x>0)
-  xnz<-x[nzi]
+  #returns a quantile normalized version of the positive data xnz
   nnz<-length(xnz)
+  #stopifnot(n>nnz)
   if(is.null(sc)){
     #assumes at least one gene is a zero count
     lpz<-log(n-nnz)-log(n) #log(fraction of zeros)
@@ -82,10 +83,41 @@ quminorm_poilog<-function(x,shape,sc=NULL,err2na=TRUE){
     cdf_nz<-make_cdf_nz(thresh,dfunc)
   }
   if(is.null(cdf_nz)){
-    x[nzi]<-NA
+    return(rep(NA,nnz))
   } else {
-    x[nzi]<-quminorm_inner(xnz,cdf_nz,nnz)
+    return(quminorm_inner(xnz,cdf_nz,nnz))
   }
-  x #quantile normalized version of x
 }
 
+quminorm_poilog<-function(x,shape,...){
+  #x a data vector with at least one zero value and the rest positive counts
+  #... additional arguments passed to quminorm_poilog_nz
+  #returns a quantile normalized version of the data x with zeros unchanged
+  nzi<-which(x>0)
+  x[nzi]<-quminorm_poilog_nz(x[nzi],length(x),shape,...)
+  x
+}
+
+quminorm_dense<-function(m,shape,mc.cores=1){
+  #this function is best when m is dense and doesn't contain many zeros
+  if(mc.cores==1){
+    for(i in seq_len(ncol(m))){
+      m[,i]<-quminorm_poilog(m[,i],shape)
+    }
+  } else {
+    res<-colapply_dense_parallel(m,quminorm_poilog,shape,mc.cores=mc.cores)
+    m[,]<-unlist(res)
+  }
+  m
+}
+
+#' @importFrom methods as
+#' @importFrom Matrix drop0
+quminorm_sparse<-function(m,shape,mc.cores=1){
+  #if m is sparse, it's better to operate only on nonzero elements
+  m<-as(drop0(m), "CsparseMatrix") #make sure it is column-oriented sparsity
+  qmlist<-colapply_sparse_nonzero(m, quminorm_poilog_nz, n=nrow(m),
+                           shape=shape, mc.cores=mc.cores)
+  m@x<-unlist(qmlist) #replace all nonzero elements with stacked cols vector
+  m #return sparse matrix
+}

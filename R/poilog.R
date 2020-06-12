@@ -51,7 +51,7 @@ poilog_mle_matrix<-function(m,...){
     })
   }
   if(is(m,"sparseMatrix")){
-    res<-as.data.frame(do.call(rbind,colapply_full(m,mle_func)))
+    res<-as.data.frame(do.call(rbind,colapply_sparse_full(m,mle_func)))
   } else {
     res<-as.data.frame(t(apply(m,2,mle_func)))
   }
