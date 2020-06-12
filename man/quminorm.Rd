@@ -2,18 +2,18 @@
 % Please edit documentation in R/AllGenerics.R, R/quminorm_user_function.R
 \name{quminorm}
 \alias{quminorm}
-\alias{quminorm,SummarizedExperiment-method}
 \alias{quminorm,Matrix-method}
 \alias{quminorm,matrix-method}
+\alias{quminorm,SummarizedExperiment-method}
 \title{Quantile normalization of non-UMI single-cell gene expression}
 \usage{
 quminorm(object, ...)
 
-\S4method{quminorm}{SummarizedExperiment}(object, assayName = "tpm", shape = 2, mc.cores = 1)
-
 \S4method{quminorm}{Matrix}(object, shape = 2, mc.cores = 1)
 
 \S4method{quminorm}{matrix}(object, shape = 2, mc.cores = 1)
+
+\S4method{quminorm}{SummarizedExperiment}(object, assayName = "tpm", shape = 2, mc.cores = 1)
 }
 \arguments{
 \item{object}{A \code{SingleCellExperiment}, \code{SummarizedExperiment},
@@ -22,16 +22,16 @@ quminorm(object, ...)
 \item{...}{for the generic, additional arguments to pass to object-specific
 methods.}
 
-\item{assayName}{In case object is a SingleCellExperiment or
-SummarizedExperiment, the assay from which
-the quasi-UMIs should be calculated is specified here.}
-
 \item{shape}{Positive scalar, a fixed shape parameter for the target
 distribution. The shape parameter represents sigma for the
 Poisson-lognormal target distribution. See \code{\link[sads]{dpoilog}}.}
 
 \item{mc.cores}{Positive integer indicating the number of cores to use for
 parallel processing. See \code{\link[parallel]{mclapply}}.}
+
+\item{assayName}{In case object is a SingleCellExperiment or
+SummarizedExperiment, the assay from which
+the quasi-UMIs should be calculated is specified here.}
 }
 \value{
 An object of same class as m but with the nonzero values normalized

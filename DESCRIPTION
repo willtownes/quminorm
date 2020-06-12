@@ -30,7 +30,8 @@ Suggests:
     knitr,
     scater,
     scRNAseq,
-    SingleCellExperiment
+    SingleCellExperiment,
+    testthat
 URL: https://github.com/willtownes/quminorm
 BugReports: https://github.com/willtownes/quminorm/issues
 VignetteBuilder: knitr

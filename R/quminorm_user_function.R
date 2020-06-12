@@ -43,25 +43,6 @@
 #' #Then run the function
 #' sce <- quminorm(sce[,seq_len(10)])
 #'
-#' @importFrom SummarizedExperiment assay assay<-
-#' @export
-setMethod(f = "quminorm",
-          signature = signature(object = "SummarizedExperiment"),
-          definition = function(object, assayName = "tpm", shape = 2,
-                                mc.cores = 1){
-              m <- assay(object, assayName)
-              name <- paste("qumi_poilog", shape, sep = "_")
-              if(is(m,"sparseMatrix")){
-                  assay(object, name)<-quminorm_sparse(m, shape,
-                                                       mc.cores=mc.cores)
-              } else { #m is dense
-                  assay(object, name)<-quminorm_dense(m, shape,
-                                                      mc.cores=mc.cores)
-              }
-              object
-          })
-
-#' @rdname quminorm
 #' @export
 setMethod(f = "quminorm",
           signature = signature(object = "Matrix"),
@@ -75,4 +56,24 @@ setMethod(f = "quminorm",
           signature = signature(object = "matrix"),
           definition = function(object, shape = 2, mc.cores = 1){
               quminorm_dense(object, shape, mc.cores=mc.cores)
+          })
+
+#' @rdname quminorm
+#' @importFrom SummarizedExperiment assay assay<-
+#' @export
+setMethod(f = "quminorm",
+          signature = signature(object = "SummarizedExperiment"),
+          definition = function(object, assayName = "tpm", shape = 2,
+                                mc.cores = 1){
+              m <- assay(object, assayName)
+              name <- paste("qumi_poilog", shape, sep = "_")
+              # if(is(m,"sparseMatrix")){
+              #     assay(object, name)<-quminorm_sparse(m, shape,
+              #                                          mc.cores=mc.cores)
+              # } else { #m is dense
+              #     assay(object, name)<-quminorm_dense(m, shape,
+              #                                         mc.cores=mc.cores)
+              # }
+              assay(object, name)<-quminorm(m, shape, mc.cores=mc.cores)
+              object
           })
