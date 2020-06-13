@@ -1,38 +1,113 @@
 ---
-title: "Applying quasi-UMI normalization to data"
+title: "Quasi-UMI normalization"
 author: "Will Townes"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
-output: rmarkdown::html_vignette
+output: 
+  BiocStyle::html_document:
+    toc: false
 vignette: >
   %\VignetteEngine{knitr::knitr}
-  %\VignetteIndexEntry{Applying quasi-UMI normalization to data}
+  %\VignetteIndexEntry{Overview of Scry Methods}
   %\usepackage[UTF-8]{inputenc}
 ---
 
-# Applying quasi-UMI normalization to data
+## Introduction
 
-## Load packages and example data
+Quasi-UMI normalization is a technique for converting single-cell RNA-Seq
+read counts that lack unique molecular identifiers (UMIs) to a Poisson-lognormal
+target distribution that approximates a true UMI count distribution.
+
+An example of a non-UMI count protocol is Smart-seq2. An example of a UMI
+count protocol is Drop-seq. Suppose we have a non-UMI count dataset ("A"). We 
+recommend the following pipeline:
+
+1. Quantify gene expression in dataset A using a method that
+adjusts for gene-length bias, such as transcripts-per-million (TPM).
+2. (optional) Find a public UMI counts dataset ("B") with similar biological 
+properties as dataset A, for example by searching a 
+[curated repository](https://doi.org/10.1101/742304). Use the 
+**poilog_mle_matrix** function to obtain maximum likelihood estimates of the 
+Poisson-lognormal shape parameters for each cell in B. 
+Save the mean or median of this distribution as the fixed shape parameter.
+If this is too much trouble, just set the shape parameter to the default value
+of 2.0.
+3. Use the **quminorm** function to convert dataset A from TPMs to QUMI counts
+using the shape parameter from step 2.
+If dataset A has a lot of zeros, it will probably be most efficient to 
+pass in the data as a sparse Matrix object, as this will enable quminorm to
+operate on only the nonzero elements. Quminorm supports parallelization by 
+setting the `mc.cores` parameter.
+4. Analyze the resulting QUMI counts as if they were UMI counts, for example by
+using feature selection and dimension reduction from the
+[scry](https://bioconductor.org/packages/release/bioc/html/scry.html) package.
+
+## Obtaining and preprocessing read count data without UMIs
 
 ```{r}
-library(scater)
-library(quminorm)
-library(glmpca)
+suppressPackageStartupMessages(library(SingleCellExperiment))
+suppressPackageStartupMessages(library(EDASeq))
+suppressPackageStartupMessages(library(Matrix))
 library(scRNAseq)
-library(ggplot2)
+require(quminorm)
 ```
 
-Data with UMI counts
+The Segerstolpe dataset is from Smart-seq2 of human pancreas tissue.
+We remove low-quality cells and genes and convert read counts to TPMs.
 
 ```{r}
-zeisel <- ZeiselBrainData()
-zeisel <- zeisel[rowData(zeisel)$featureType!="repeat",]
-
-zeisel <- aggregateAcrossFeatures(zeisel, 
-    id=sub("_loc[0-9]+$", "", rownames(zeisel)))
+sce<-SegerstolpePancreasData(ensembl=TRUE, location=FALSE)
+sce<-sce[, colData(sce)$`single cell well quality`=="OK"]
+gl<-as.data.frame(getGeneLengthAndGCContent(rownames(sce),"hg19","org.db"))
+rowData(sce)<-cbind(rowData(sce),gl)
+sce<-sce[rowSums(counts(sce))>0 & !is.na(gl$length), ]
+counts(sce)<-Matrix(counts(sce))
+tpm<-counts(sce)/rowData(sce)$length #recycling
+assay(sce,"tpm")<-t(t(tpm)/colSums(tpm))*1e6
 ```
 
-Data with read counts
+## Fitting a Poisson-lognormal distribution to UMI count data
+
+The Grun dataset is from CEL-seq of human pancreas tissue. We use it as a
+reference to determine a reasonable shape parameter for quasi-UMI normalization.
+
+This step is optional. If we didn't have time to look for a matching UMI counts
+dataset, we could just use the default of 2.0 for the shape parameter and
+skip to the next section.
 
 ```{r}
+set.seed(101)
+grun<-GrunPancreasData(ensembl=TRUE,location=FALSE)
+m<-round(counts(grun))
+m<-m[rowSums(m)>0,]
+keep<-which(colSums(m)>5000)
+#subsample of cells to save time, in real life we would use all cells
+fit<-poilog_mle_matrix(m[,sample(keep,10)])
+summary(fit$sig)
+```
 
+A shape parameter of about 1.9 appears to be appropriate for this tissue type.
+
+Visualize the UMI count distribution
+
+```{r fig.width=6, fig.height=4}
+#plot(table(m[,1]),main="Grun UMI counts")
+hist(log1p(m[,1]),main="Grun log(1+UMI counts)")
+```
+
+## Quantile normalization to obtain quasi-UMI counts
+
+Going back to the Segerstolpe data, we can now obtain QUMI counts using our
+custom shape parameter of 1.9.
+
+```{r fig.width=6, fig.height=4}
+system.time(sce<-quminorm(sce,assayName="tpm",shape=1.9,mc.cores=2))
+qumi<-assay(sce,"qumi_poilog_1.9")
+#plot(table(qumi[,1]),main="Segerstolpe QUMI counts")
+hist(log1p(qumi[,1]),main="Segerstolpe log(1+QUMI counts)")
+```
+
+Compare the QUMI count distribution to the original read count distribution.
+
+```{r fig.width=6, fig.height=4}
+hist(log1p(counts(sce)[,1]),main="Segerstolpe log(1+read counts)")
 ```

@@ -20,6 +20,7 @@ Imports:
     matrixStats,
     methods,
     sads,
+    bbmle,
     slam,
     stats,
     SummarizedExperiment,
@@ -31,6 +32,11 @@ Suggests:
     scater,
     scRNAseq,
     SingleCellExperiment,
+    EDASeq,
+    ensembldb,
+    TxDb.Hsapiens.UCSC.hg19.knownGene,
+    BSgenome.Hsapiens.UCSC.hg19,
+    org.Hs.eg.db,
     testthat
 URL: https://github.com/willtownes/quminorm
 BugReports: https://github.com/willtownes/quminorm/issues
