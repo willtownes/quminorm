@@ -14,9 +14,10 @@
 #'   The maximized value of the log-likelihood is attached as an attribute.
 #'
 #' @importFrom sads fitpoilog
-#' @importFrom stats coef logLik
+#' @importFrom bbmle coef logLik
 #' @export
 poilog_mle<-function(x,om="BFGS",...){
+  # @importFrom stats coef logLik
   fit<-fitpoilog(x,trunc=NULL,method=om,skip.hessian=TRUE,...)
   mle<-coef(fit) #fit$par
   attr(mle,"loglik")<-as.numeric(logLik(fit)) #fit$logLval

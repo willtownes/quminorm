@@ -54,14 +54,11 @@ The default assay of "tpm" for transcripts per million
   data with UMIs have not until very recently been available.
 }
 \examples{
-#First import a SingleCellExperiment
 library(scRNAseq)
 library(SingleCellExperiment)
-sce <- ReprocessedAllenData("tophat_counts")
-tpm(sce) <- assay(sce, "tophat_counts")
-
-#Then run the function
-sce <- quminorm(sce[,seq_len(10)])
+sce <- ReprocessedAllenData("rsem_tpm")
+sce <- quminorm(sce[,1:3],assayName="rsem_tpm")
+assayNames(sce)
 
 }
 \references{

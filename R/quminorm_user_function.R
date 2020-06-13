@@ -34,14 +34,11 @@
 #'   \url{https://doi.org/10.1101/817031}
 #'
 #' @examples
-#' #First import a SingleCellExperiment
 #' library(scRNAseq)
 #' library(SingleCellExperiment)
-#' sce <- ReprocessedAllenData("tophat_counts")
-#' tpm(sce) <- assay(sce, "tophat_counts")
-#'
-#' #Then run the function
-#' sce <- quminorm(sce[,seq_len(10)])
+#' sce <- ReprocessedAllenData("rsem_tpm")
+#' sce <- quminorm(sce[,1:3],assayName="rsem_tpm")
+#' assayNames(sce)
 #'
 #' @export
 setMethod(f = "quminorm",

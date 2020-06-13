@@ -1,4 +1,4 @@
-context("test quminorm")
+context("test quminorm and poilog functions")
 library(Matrix)
 library(SingleCellExperiment)
 set.seed(1234)
@@ -12,15 +12,29 @@ lambda<-matrix(exp(rnorm(ncells*2000,0,2)),ncol=ncells)
 n<-rpois(ncells,mean_tot_umi)
 lambda<-t(t(lambda)*n/colSums(lambda))
 #lambda<-lambda*rep(mu_cell,each=ngene)
-m<-matrix(rpois(length(lambda),lambda),ncol=ncells)
-pcr<-1+rgamma(length(m),2,rate=2) # mean=1+1=2, minimum=1
-m<-round(m*pcr)
+m0<-matrix(rpois(length(lambda),lambda),ncol=ncells)
+pcr<-1+rgamma(length(m0),2,rate=2) # mean=1+1=2, minimum=1
+m<-round(m0*pcr)
 tpm<-t(t(m)/colSums(m))*1e6
 m2<-Matrix(m,sparse=TRUE)
 tpm2<-Matrix(tpm,sparse=TRUE)
 se<-SummarizedExperiment(assays=list(readcounts=m))
 sce<-SingleCellExperiment(assays=list(readcounts=m,readcounts_sparse=m2,
                                       tpm=tpm,tpm_sparse=tpm2))
+
+test_that("poilog mle can be estimated from data",{
+    fit1<-poilog_mle(m0[,1])
+    expect_gt(fit1[2],0) #sigma param must be positive
+    expect_named(fit1,c("mu","sig"))
+    expect_true("loglik" %in% names(attributes(fit1)))
+    fit2<-poilog_mle_matrix(m0)
+    expect_is(fit2,"data.frame")
+    expect_equal(dim(fit2),c(ncol(m0),4))
+    expect_equal(colnames(fit2),c("mu","sig","loglik","bic"))
+    expect_gt(min(fit2$sig),0)
+    #check that poilog_mle and poilog_mle give same result
+    expect_equivalent(fit1,as.numeric(fit2[1,1:2]))
+})
 
 test_that("quminorm preserves sparsity and rank-ordering of features", {
     q0<-quminorm(m)
