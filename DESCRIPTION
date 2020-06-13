@@ -17,19 +17,17 @@ Depends:
     R (>= 3.6)
 Imports:
     Matrix,
+    SummarizedExperiment,
+    bbmle,
     matrixStats,
     methods,
+    parallel,
     sads,
-    bbmle,
     slam,
     stats,
-    SummarizedExperiment,
     utils
 Suggests:
-    ggplot2,
-    glmpca,
     knitr,
-    scater,
     scRNAseq,
     SingleCellExperiment,
     EDASeq,
