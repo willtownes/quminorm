@@ -1,0 +1,21 @@
+# R for travis: see documentation at https://docs.travis-ci.com/user/languages/r
+language: R
+r:
+  - oldrel
+  - release
+  - devel
+
+cache: packages
+
+env:
+  - CODECOV_TOKEN="26f2592c-9810-4dc7-be7c-b62820976ad8"
+
+## r_build_args: "--no-build-vignettes"
+## r_check_args: "--as-cran --no-vignettes"
+
+r_packages:
+  - covr
+
+## Run code coverage after successful build
+after_success:
+  - Rscript -e 'library(covr); codecov()'
