@@ -36,8 +36,8 @@
 #' @examples
 #' library(scRNAseq)
 #' library(SingleCellExperiment)
-#' sce <- ReprocessedAllenData("rsem_tpm")
-#' sce <- quminorm(sce[,1:3],assayName="rsem_tpm")
+#' sce <- ReprocessedAllenData("rsem_tpm",location=FALSE)
+#' sce <- quminorm(sce[,1:4],assayName="rsem_tpm",mc.cores=2)
 #' assayNames(sce)
 #'
 #' @export
