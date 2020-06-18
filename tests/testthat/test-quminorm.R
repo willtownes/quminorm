@@ -23,17 +23,13 @@ sce<-SingleCellExperiment(assays=list(readcounts=m,readcounts_sparse=m2,
                                       tpm=tpm,tpm_sparse=tpm2))
 
 test_that("poilog mle can be estimated from data",{
-    fit1<-poilog_mle(m0[,1])
-    expect_gt(fit1[2],0) #sigma param must be positive
-    expect_named(fit1,c("mu","sig"))
-    expect_true("loglik" %in% names(attributes(fit1)))
-    fit2<-poilog_mle_matrix(m0)
-    expect_is(fit2,"data.frame")
-    expect_equal(dim(fit2),c(ncol(m0),4))
-    expect_equal(colnames(fit2),c("mu","sig","loglik","bic"))
-    expect_gt(min(fit2$sig),0)
-    #check that poilog_mle and poilog_mle give same result
-    expect_equivalent(fit1,as.numeric(fit2[1,1:2]))
+    fit1<-poilog_mle(m0)
+    expect_gt(min(fit1$sig),0) #sigma param must be positive
+    expect_equal(colnames(fit1),c("mu","sig","loglik","bic"))
+    expect_is(fit1,"data.frame")
+    expect_equal(dim(fit1),c(ncol(m0),4))
+    m0s<-Matrix(m0,sparse=TRUE)
+    expect_equal(fit1,poilog_mle(m0s)) #check sparse and dense give same result
 })
 
 test_that("quminorm preserves sparsity and rank-ordering of features", {
