@@ -100,13 +100,13 @@ quminorm_poilog<-function(x,shape,...){
 
 quminorm_dense<-function(m,shape,mc.cores=1){
   #this function is best when m is dense and doesn't contain many zeros
-  if(mc.cores==1){
+  if(mc.cores>1){
+    res<-colapply_dense_parallel(m,quminorm_poilog,shape,mc.cores=mc.cores)
+    m[,]<-as.numeric(unlist(res))
+  } else {
     for(i in seq_len(ncol(m))){
       m[,i]<-quminorm_poilog(m[,i],shape)
     }
-  } else {
-    res<-colapply_dense_parallel(m,quminorm_poilog,shape,mc.cores=mc.cores)
-    m[,]<-as.numeric(unlist(res))
   }
   m
 }

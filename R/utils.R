@@ -56,10 +56,10 @@ colapply_sparse_nonzero<-function(X,FUN,...,mc.cores=1){
     #mc: should parallel processing be used? Only recommended if FUN is slow
     #... additional args passed to mclapply or to FUN
     #this function always returns a list of length ncol(X)
-    if(mc.cores==1){
-        return(lapply(listCols_sparse(X),FUN,...))
-    } else {
+    if(mc.cores>1){
         return(mclapply(listCols_sparse(X),FUN,...,mc.cores=mc.cores))
+    } else {
+        return(lapply(listCols_sparse(X),FUN,...))
     }
 }
 

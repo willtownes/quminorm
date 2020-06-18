@@ -1,61 +1,48 @@
-# functions for fitting and quantile normalizing to poisson-lognormal
+# functions for fitting Poisson-lognormal distributions
 
-#' Poisson-lognormal MLEs
-#'
-#' Compute the maximum likelihood estimates for parameters of the
-#' Poisson-lognormal distribution.
-#'
-#' @param x vector of non-negative integers (the data).
-#' @param om optimization method to be used by \code{\link[sads]{fitpoilog}}.
-#' @param ... additional arguments passed to \code{\link[sads]{fitpoilog}}.
-#'
-#' @return a named numeric vector containing the MLEs of mu,sigma (see
-#'   \code{\link[sads]{dpoilog}} for details).
-#'   The maximized value of the log-likelihood is attached as an attribute.
-#'
 #' @importFrom sads fitpoilog
 #' @importFrom bbmle coef logLik
-#' @export
-poilog_mle<-function(x,om="BFGS",...){
-  # @importFrom stats coef logLik
-  fit<-fitpoilog(x,trunc=NULL,method=om,skip.hessian=TRUE,...)
-  mle<-coef(fit) #fit$par
-  attr(mle,"loglik")<-as.numeric(logLik(fit)) #fit$logLval
-  mle
+poilog_mle1<-function(x,...){
+  #the '1' means it is only applied to one column instead of a matrix
+  tryCatch({
+    fit<-fitpoilog(x,trunc=NULL,method="BFGS",skip.hessian=TRUE,...)
+    res<-coef(fit) #fit$par
+    c(res,loglik=as.numeric(logLik(fit))) #fit$logLval
+  },
+  error=function(e){
+    rep(NA,3)
+  })
 }
 
-#' Poisson-lognormal MLEs for columns of a matrix
-#'
-#' Compute the maximum likelihood estimates for parameters of the
-#' Poisson-lognormal distribution for each column of a matrix.
-#'
-#' @param m a matrix or sparse Matrix of non-negative integers (the data).
-#' @param ... additional arguments passed to \code{\link{poilog_mle}}.
-#'
-#' @return a data frame whose rows correspond to the columns of m.
-#'   The columns contain the MLEs for the parameters, the log-likelihood, and
-#'   the \code{\link[stats]{BIC}} values.
-#'
-#' @importFrom methods is
-#' @export
-poilog_mle_matrix<-function(m,...){
+poilog_mle_dense<-function(m, mc.cores=1){
   #m a matrix with samples in the columns
   #returns a data frame with nrows=ncols(m)
-  #result includes mu,sigma params, log likelihood, and BIC
-  mle_func<-function(x){
-    tryCatch({
-      mle<-poilog_mle(x,...)
-      c(mle,loglik=attr(mle,"loglik"))
-    },
-    error=function(e){
-      rep(NA,3)
-    })
+  #result includes mu, sig params, log likelihood, and BIC
+  if(mc.cores>1){ #parallel apply
+    res<-colapply_dense_parallel(m, poilog_mle1, mc.cores=mc.cores)
+    res<-simplify2array(res)
+  } else { #serial apply
+    res<-apply(m,2,poilog_mle1)
   }
-  if(is(m,"sparseMatrix")){
-    res<-as.data.frame(do.call(rbind,colapply_sparse_full(m,mle_func)))
+  res<-as.data.frame(t(res))
+  res$bic<- -2*res$loglik + log(nrow(m))*2
+  res
+}
+
+poilog_mle1_nz<-function(xnz,n){
+  #thin wrapper if only the nonzero values were provided (xnz)
+  #n: the length of the data vector if zeros were included
+  poilog_mle1(c(xnz,rep.int(0,n-length(xnz))))
+}
+
+poilog_mle_sparse<-function(m, mc.cores=1){
+  if(mc.cores>1){
+    res<-colapply_sparse_nonzero(m, poilog_mle1_nz, n=nrow(m),
+                                 mc.cores=mc.cores)
   } else {
-    res<-as.data.frame(t(apply(m,2,mle_func)))
+    res<-colapply_sparse_full(m,poilog_mle1)
   }
+  res<-as.data.frame(do.call(rbind,res))
   res$bic<- -2*res$loglik + log(nrow(m))*2
   res
 }

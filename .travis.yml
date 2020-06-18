@@ -1,8 +1,8 @@
 # R for travis: see documentation at https://docs.travis-ci.com/user/languages/r
 language: R
 r:
-  - bioc-release
   - bioc-devel
+##  - bioc-release
 cache: packages
 warnings_are_errors: false
 env: CODECOV_TOKEN="26f2592c-9810-4dc7-be7c-b62820976ad8"

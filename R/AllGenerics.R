@@ -10,3 +10,16 @@ setGeneric(
         standardGeneric("quminorm")
     }
 )
+
+#' @title Poisson-lognormal maximum likelihood estimation
+#' @rdname poilog_mle
+#' @param ... for the generic, additional arguments to pass to object-specific
+#'   methods.
+#' @export
+setGeneric(
+    name = "poilog_mle",
+    signature = 'object',
+    def = function(object, ...) {
+        standardGeneric("poilog_mle")
+    }
+)
