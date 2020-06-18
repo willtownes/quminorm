@@ -16,7 +16,8 @@
 #' @param mc.cores Positive integer indicating the number of cores to use for
 #'   parallel processing. See \code{\link[parallel]{mclapply}}.
 #'
-#' @return An object of same class as m but with the nonzero values normalized
+#' @return An object of same class as the input object
+#'   but with the nonzero values normalized
 #'   to match the target quasi-UMI distribution. In case of a
 #'   SingleCellExperiment or SummarizedExperiment,
 #'   the quasiUMIs are added to a new assays slot named qumi_poilog_[shape]

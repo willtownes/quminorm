@@ -34,7 +34,8 @@ SummarizedExperiment, the assay from which
 the quasi-UMIs should be calculated is specified here.}
 }
 \value{
-An object of same class as m but with the nonzero values normalized
+An object of same class as the input object
+  but with the nonzero values normalized
   to match the target quasi-UMI distribution. In case of a
   SingleCellExperiment or SummarizedExperiment,
   the quasiUMIs are added to a new assays slot named qumi_poilog_[shape]
