@@ -81,7 +81,7 @@ m<-round(counts(grun))
 m<-m[rowSums(m)>0,]
 keep<-which(colSums(m)>5000)
 #subsample of cells to save time, in real life we would use all cells
-fit<-poilog_mle_matrix(m[,sample(keep,10)])
+fit<-poilog_mle(m[,sample(keep,10)],mc.cores=2)
 summary(fit$sig)
 ```
 
