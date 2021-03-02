@@ -53,6 +53,13 @@ The default assay of "tpm" for transcripts per million
   summarizing to gene level. The algorithm in its current form has not been
   evaluated for quasi-UMI generation from transcript counts, as full-length
   data with UMIs have not until very recently been available.
+
+  If NA values appear in the quminorm output, this is likely caused by
+  numerical errors in computing the Poisson-lognormal cumulative distribution
+  function. In our experience it is more common in cells with very high
+  zero fractions.
+  Consider either discarding these cells or using a smaller quminorm shape
+  parameter to avoid having the NAs.
 }
 \examples{
 library(scRNAseq)
@@ -65,6 +72,6 @@ assayNames(sce)
 \references{
 Townes FW and Irizarry RA (2020). Quantile normalization of
   single-cell RNA-seq read counts without unique molecular identifiers.
-  \emph{bioRxiv}
-  \url{https://doi.org/10.1101/817031}
+  \emph{Genome Biology}
+  \url{https://doi.org/10.1186/s13059-020-02078-0}
 }

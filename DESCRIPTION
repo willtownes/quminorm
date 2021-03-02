@@ -41,4 +41,4 @@ BugReports: https://github.com/willtownes/quminorm/issues
 VignetteBuilder: knitr
 LazyData: false
 Encoding: UTF-8
-RoxygenNote: 7.1.0
+RoxygenNote: 7.1.1
