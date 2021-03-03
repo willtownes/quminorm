@@ -14,7 +14,7 @@ Authors@R: c(person("F. William", "Townes", email = "will.townes@gmail.com",
             role="aut"))
 License: LGPL (>= 3) | file LICENSE
 Depends:
-    R (>= 4.1)
+    R (>= 4.0)
 Imports:
     Matrix,
     SummarizedExperiment,
